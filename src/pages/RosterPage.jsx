@@ -1,12 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useRoster, hasJobCard } from '../contexts/RosterContext'
+import { useRoster, hasJobCard, classifyShift } from '../contexts/RosterContext'
 import ShiftPill from '../components/ShiftPill'
 
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 function todayLabel() {
   return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()]
+}
+
+// Parse a shift string into code, times, duration
+function parseShift(shift) {
+  if (!shift) return { code: '—', times: '', duration: '', hasEx: false }
+  const hasEx = /^EX\s*\//i.test(shift)
+  const clean = shift.replace(/^EX\s*\/\s*/i, '').trim()
+
+  // Duration e.g. "(08:18)"
+  const durMatch = clean.match(/\((\d{2}:\d{2})\)/)
+  const duration = durMatch ? durMatch[1] : ''
+
+  // Time range e.g. "06:38-14:56" or "14:00 - 1700"
+  const timeMatch = clean.match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/)
+  const times = timeMatch ? `${timeMatch[1]}-${timeMatch[2]}` : ''
+
+  // Code: leading word(s) before any time
+  // Handle "04:07 CS0407" (leading time + code)
+  const leadingTime = clean.match(/^(\d{2}:\d{2})\s+([A-Z][A-Z0-9#\-]+)/i)
+  let code
+  if (leadingTime) {
+    code = leadingTime[2]
+  } else {
+    // Normal: CODE ... times ... duration
+    code = clean
+      .replace(/\(\d{2}:\d{2}\)/, '')
+      .replace(/\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}/, '')
+      .replace(/S\/O\s+\w+/, '') // remove "S/O BHAB" etc
+      .trim()
+      .split(/\s+/)[0] // first word only
+  }
+
+  return { code: code || clean, times, duration, hasEx }
 }
 
 function useDarkMode() {
@@ -86,12 +119,40 @@ export default function RosterPage() {
               {DAYS.map(day => {
                 const shift = entry.days[day] || ''
                 const isToday = entry.isCurrent && day === today
+                const { code, times, duration, hasEx } = parseShift(shift)
+                const type = classifyShift(shift)
+                const isEmpty = !shift
+                const badgeClass = {
+                  blp:'badge-blp', slp:'badge-slp', afp:'badge-afp', al:'badge-al',
+                  spare:'badge-spare', eb:'badge-eb', ef:'badge-ef', tr:'badge-tr',
+                  cs:'badge-cs', other:'badge-other', empty:'badge-blp'
+                }[type] || 'badge-other'
+
                 return (
                   <div key={day} onClick={() => shift && setSelectedShift({ entry, day, shift })}
-                    style={{ background: isToday ? 'var(--today-bg)' : 'transparent', border: isToday ? '2px solid var(--today-bdr)' : '1px solid transparent', borderRadius:5, padding:'3px 2px', cursor: shift ? 'pointer' : 'default' }}>
+                    style={{ background: isToday ? 'var(--today-bg)' : 'transparent', border: isToday ? '2px solid var(--today-bdr)' : '1px solid transparent', borderRadius:6, padding:'4px 3px', cursor: shift ? 'pointer' : 'default', minHeight: 72 }}>
+                    {/* Day name */}
                     <div style={{ fontSize:'0.58rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', fontWeight: isToday ? 600 : 400 }}>{day}</div>
-                    <div style={{ fontSize:'0.62rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', marginBottom:3, fontFamily:'JetBrains Mono,monospace', fontWeight: isToday ? 700 : 400 }}>{entry.dayDates[day]}</div>
-                    <div style={{ textAlign:'center' }}><ShiftPill shift={shift} compact /></div>
+                    {/* Date number */}
+                    <div style={{ fontSize:'0.65rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', marginBottom:4, fontFamily:'JetBrains Mono,monospace', fontWeight: isToday ? 700 : 600 }}>{entry.dayDates[day]}</div>
+                    {/* Shift code badge */}
+                    <div style={{ textAlign:'center', marginBottom: times ? 2 : 0 }}>
+                      <span className={`shift-code ${badgeClass}`} style={{ fontSize:'0.65rem', padding:'1px 4px', borderRadius:4, display:'inline-block', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {hasEx && <span style={{ opacity:0.7, marginRight:2 }}>EX</span>}{code}
+                      </span>
+                    </div>
+                    {/* Times */}
+                    {times && (
+                      <div className="time-display" style={{ fontSize:'0.58rem', color: isToday ? 'var(--today-txt)' : 'var(--text)', textAlign:'center', lineHeight:1.3, opacity:0.85 }}>
+                        {times}
+                      </div>
+                    )}
+                    {/* Duration */}
+                    {duration && (
+                      <div className="time-display" style={{ fontSize:'0.56rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', opacity:0.75 }}>
+                        {duration}
+                      </div>
+                    )}
                   </div>
                 )
               })}
