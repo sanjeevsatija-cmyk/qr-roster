@@ -87,7 +87,7 @@ html, body {
   box-shadow: var(--card-shadow);
 }
 
-/* Shift badge colours */
+/* Shift badge colours — dark mode (default) */
 .badge-blp  { background:#1E293B; color:#64748B; }
 .badge-slp  { background:#1E2A3A; color:#60A5FA; }
 .badge-afp  { background:#1C2B20; color:#34D399; }
@@ -98,6 +98,18 @@ html, body {
 .badge-tr   { background:#1A1830; color:#93C5FD; }
 .badge-cs   { background:#1E1A10; color:#FCD34D; }
 .badge-other{ background:#1A1520; color:#E879F9; }
+
+/* Light mode badge overrides */
+[data-theme="light"] .badge-blp  { background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; }
+[data-theme="light"] .badge-slp  { background:#EFF6FF; color:#1D4ED8; }
+[data-theme="light"] .badge-afp  { background:#F0FDF4; color:#166534; }
+[data-theme="light"] .badge-al   { background:#F0FDF4; color:#166534; }
+[data-theme="light"] .badge-spare{ background:#F5F3FF; color:#5B21B6; }
+[data-theme="light"] .badge-eb   { background:#ECFCCB; color:#3F6212; }
+[data-theme="light"] .badge-ef   { background:#F7FEE7; color:#4D7C0F; }
+[data-theme="light"] .badge-tr   { background:#EFF6FF; color:#1E40AF; }
+[data-theme="light"] .badge-cs   { background:#FFFBEB; color:#92400E; }
+[data-theme="light"] .badge-other{ background:#FDF4FF; color:#7E22CE; }
 
 @keyframes pulse-border {
   0%,100% { border-color: var(--amber); }

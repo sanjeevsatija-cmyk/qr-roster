@@ -81,7 +81,8 @@ export default function RosterPage() {
               </div>
               <span style={{ fontSize:'0.7rem', color:'var(--muted)', fontFamily:'JetBrains Mono,monospace', flexShrink:0 }}>{entry.dateFormatted}</span>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:3 }}>
+            <div style={{ overflowX:'auto', marginLeft:-4, marginRight:-4, paddingLeft:4, paddingRight:4 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(72px, 1fr))', gap:3, minWidth:430 }}>
               {DAYS.map(day => {
                 const shift = entry.days[day] || ''
                 const isToday = entry.isCurrent && day === today
@@ -94,6 +95,7 @@ export default function RosterPage() {
                   </div>
                 )
               })}
+              </div>
             </div>
           </div>
         )
