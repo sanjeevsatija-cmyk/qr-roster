@@ -115,7 +115,7 @@ export default function RosterPage() {
               <span style={{ fontSize:'0.7rem', color:'var(--muted)', fontFamily:'JetBrains Mono,monospace', flexShrink:0 }}>{entry.dateFormatted}</span>
             </div>
             <div style={{ overflowX:'auto', marginLeft:-4, marginRight:-4, paddingLeft:4, paddingRight:4 }}>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(72px, 1fr))', gap:3, minWidth:430 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(7, minmax(84px, 1fr))', gap:3, minWidth:500 }}>
               {DAYS.map(day => {
                 const shift = entry.days[day] || ''
                 const isToday = entry.isCurrent && day === today
@@ -132,24 +132,24 @@ export default function RosterPage() {
                   <div key={day} onClick={() => shift && setSelectedShift({ entry, day, shift })}
                     style={{ background: isToday ? 'var(--today-bg)' : 'transparent', border: isToday ? '2px solid var(--today-bdr)' : '1px solid transparent', borderRadius:6, padding:'4px 3px', cursor: shift ? 'pointer' : 'default', minHeight: 72 }}>
                     {/* Day name */}
-                    <div style={{ fontSize:'0.58rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', fontWeight: isToday ? 600 : 400 }}>{day}</div>
+                    <div style={{ fontSize:'0.72rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', fontWeight: isToday ? 600 : 400 }}>{day}</div>
                     {/* Date number */}
-                    <div style={{ fontSize:'0.65rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', marginBottom:4, fontFamily:'JetBrains Mono,monospace', fontWeight: isToday ? 700 : 600 }}>{entry.dayDates[day]}</div>
+                    <div style={{ fontSize:'0.78rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', marginBottom:4, fontFamily:'JetBrains Mono,monospace', fontWeight: isToday ? 700 : 600 }}>{entry.dayDates[day]}</div>
                     {/* Shift code badge */}
                     <div style={{ textAlign:'center', marginBottom: times ? 2 : 0 }}>
-                      <span className={`shift-code ${badgeClass}`} style={{ fontSize:'0.65rem', padding:'1px 4px', borderRadius:4, display:'inline-block', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      <span className={`shift-code ${badgeClass}`} style={{ fontSize:'0.78rem', padding:'2px 5px', borderRadius:4, display:'inline-block', maxWidth:'100%', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                         {hasEx && <span style={{ opacity:0.7, marginRight:2 }}>EX</span>}{code}
                       </span>
                     </div>
                     {/* Times */}
                     {times && (
-                      <div className="time-display" style={{ fontSize:'0.58rem', color: isToday ? 'var(--today-txt)' : 'var(--text)', textAlign:'center', lineHeight:1.3, opacity:0.85 }}>
+                      <div className="time-display" style={{ fontSize:'0.7rem', color: isToday ? 'var(--today-txt)' : 'var(--text)', textAlign:'center', lineHeight:1.3, opacity:0.85 }}>
                         {times}
                       </div>
                     )}
                     {/* Duration */}
                     {duration && (
-                      <div className="time-display" style={{ fontSize:'0.56rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', opacity:0.75 }}>
+                      <div className="time-display" style={{ fontSize:'0.68rem', color: isToday ? 'var(--today-txt)' : 'var(--muted)', textAlign:'center', opacity:0.75 }}>
                         {duration}
                       </div>
                     )}
