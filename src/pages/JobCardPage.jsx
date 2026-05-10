@@ -76,47 +76,69 @@ export default function JobCardPage() {
       )}
 
       {/* Job card detail */}
-      {selected && (
+      {selected && (() => {
+        // Parse S/O location and times from header
+        // e.g. "MON EB117 S/O BHAB 14:20-23:12 (08:52)"
+        const soMatch = selected.header.match(/S\/O\s+(\w+)\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})/i)
+        const signOnLocation = soMatch ? soMatch[1] : ''
+        const signOnTime     = soMatch ? soMatch[2].replace(':','') : ''
+        const signOffTime    = soMatch ? soMatch[3].replace(':','') : ''
+
+        const allLegs = [
+          // Inject sign-on as first entry
+          ...(signOnLocation ? [{ depart: signOnTime, trainNo: `SIGN ON ${signOnLocation}`, centralArrive:'', centralDepart:'', arrive:'', remarks:'', _signOn: true }] : []),
+          ...selected.legs,
+          // Inject sign-off as last entry
+          ...(signOffTime ? [{ depart: signOffTime, trainNo: `SIGN OFF ${signOnLocation}`, centralArrive:'', centralDepart:'', arrive:'', remarks:'', _signOff: true }] : []),
+        ]
+
+        return (
         <div className="fade-in">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div>
               <div className="shift-code" style={{ fontSize:'0.78rem', color:'#F59E0B', marginBottom:2 }}>{selected.header}</div>
-              <div style={{ fontSize:'0.68rem', color:'#64748B' }}>{selected.legs.length} legs</div>
+              <div style={{ fontSize:'0.68rem', color:'var(--muted)' }}>{selected.legs.length} legs</div>
             </div>
-            <button className="btn-ghost" onClick={() => { setSelected(null); setQuery('') }} style={{ color:'#64748B' }}>← Back</button>
+            <button className="btn-ghost" onClick={() => { setSelected(null); setQuery('') }} style={{ color:'var(--muted)' }}>← Back</button>
           </div>
 
           <div className="card" style={{ padding:'12px 14px' }}>
-            {selected.legs.map((leg, i) => (
+            {allLegs.map((leg, i) => (
               <div key={i} style={{
                 display:'grid', gridTemplateColumns:'52px 1fr', gap:10,
-                paddingBottom: i < selected.legs.length-1 ? 12 : 0,
-                marginBottom: i < selected.legs.length-1 ? 12 : 0,
-                borderBottom: i < selected.legs.length-1 ? '1px solid var(--border)' : 'none',
+                paddingBottom: i < allLegs.length-1 ? 12 : 0,
+                marginBottom: i < allLegs.length-1 ? 12 : 0,
+                borderBottom: i < allLegs.length-1 ? '1px solid var(--border)' : 'none',
+                background: leg._signOn || leg._signOff ? 'var(--surface2)' : 'transparent',
+                borderRadius: leg._signOn || leg._signOff ? 6 : 0,
+                padding: leg._signOn || leg._signOff ? '6px 8px' : undefined,
+                marginLeft: leg._signOn || leg._signOff ? -8 : 0,
+                marginRight: leg._signOn || leg._signOff ? -8 : 0,
               }}>
                 <div style={{ paddingTop:2 }}>
                   {leg.depart
-                    ? <span className="time-display" style={{ fontSize:'0.85rem', color:'#F59E0B', fontWeight:600 }}>{leg.depart}</span>
-                    : <span style={{ fontSize:'0.75rem', color:'#374151' }}>—</span>
+                    ? <span className="time-display" style={{ fontSize:'0.85rem', color: leg._signOn || leg._signOff ? '#34D399' : '#F59E0B', fontWeight:600 }}>{leg.depart}</span>
+                    : <span style={{ fontSize:'0.75rem', color:'var(--muted)' }}>—</span>
                   }
                 </div>
                 <div>
-                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color:'#BEF264', marginBottom:2 }}>{leg.trainNo}</div>}
+                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color: leg._signOn || leg._signOff ? '#34D399' : '#BEF264', marginBottom:2 }}>{leg.trainNo}</div>}
                   {(leg.centralArrive || leg.centralDepart) && (
-                    <div className="time-display" style={{ fontSize:'0.7rem', color:'#64748B', marginBottom:2 }}>
+                    <div className="time-display" style={{ fontSize:'0.7rem', color:'var(--muted)', marginBottom:2 }}>
                       {leg.centralArrive && `↓ Cen ${leg.centralArrive}`}
                       {leg.centralArrive && leg.centralDepart && '  '}
                       {leg.centralDepart && `↑ ${leg.centralDepart}`}
                     </div>
                   )}
-                  {leg.arrive && <div className="time-display" style={{ fontSize:'0.7rem', color:'#94A3B8' }}>Arr {leg.arrive}</div>}
+                  {leg.arrive && <div className="time-display" style={{ fontSize:'0.7rem', color:'var(--muted)' }}>Arr {leg.arrive}</div>}
                   {leg.remarks && <div style={{ fontSize:'0.7rem', color:'#60A5FA', marginTop:3, lineHeight:1.4 }}>{leg.remarks}</div>}
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
