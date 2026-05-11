@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRoster, hasJobCard, classifyShift } from '../contexts/RosterContext'
+import { requestNotificationPermission, getNotificationPermission } from '../hooks/useNotifications'
+import { isQldHoliday } from '../data/qldHolidays'
 import ShiftPill from '../components/ShiftPill'
 
 const DAYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
@@ -93,6 +95,20 @@ const BADGE_COLOR = {
   night: '#A78BFA',
 }
 
+// ─── Extract sign-on time from shift string ("06:15" or null) ────────────────
+function extractSignOnTime(shift) {
+  if (!shift) return null
+  const clean = shift.replace(/^EX\s*\/\s*/i, '').trim()
+  const rangeMatch = clean.match(/^(\d{1,2}:\d{2})\s*[-–]/)
+  if (rangeMatch) {
+    const [h, m] = rangeMatch[1].split(':')
+    return `${String(h).padStart(2, '0')}:${m}`
+  }
+  const leadingMatch = clean.match(/^(\d{2}:\d{2})\s+[A-Z]/i)
+  if (leadingMatch) return leadingMatch[1]
+  return null
+}
+
 // ─── Dark mode hook — unchanged from original ─────────────────────────────────
 function useDarkMode() {
   const [dark, setDark] = useState(() => localStorage.getItem('qr_theme') !== 'light')
@@ -111,11 +127,14 @@ function useDarkMode() {
 // ─── RosterPage ───────────────────────────────────────────────────────────────
 export default function RosterPage() {
   const navigate = useNavigate()
-  const { personalRoster, startingLink, resetAll } = useRoster()
+  const { personalRoster, startingLink, resetAll, notes, setNote, reminders, setReminder, clearReminder } = useRoster()
 
   const [weekOffset,    setWeekOffset]    = useState(0)
   const [selectedShift, setSelectedShift] = useState(null)
   const [showSettings,  setShowSettings]  = useState(false)
+  const [noteSheet,     setNoteSheet]     = useState(null) // { dateKey, dateLabel, text }
+  const [reminderSheet, setReminderSheet] = useState(null) // { dateKey, dateLabel, signOnTime, offsetMinutes }
+  const [notifPerm,     setNotifPerm]     = useState(() => getNotificationPermission())
   const [showWeekPicker, setShowWeekPicker] = useState(false)
   const [pickerMonth,    setPickerMonth]    = useState(() => {
     const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1)
@@ -321,6 +340,15 @@ export default function RosterPage() {
           dayDate.setDate(entry.monday.getDate() + i)
           const dateLabel = `${day} · ${dayDate.getDate()} ${MONTHS[dayDate.getMonth()]}`
 
+          // Note key: YYYY-MM-DD for localStorage
+          const noteKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth()+1).padStart(2,'0')}-${String(dayDate.getDate()).padStart(2,'0')}`
+          const hasNote    = !!(notes && notes[noteKey])
+          const isHoliday  = isQldHoliday(dayDate)
+
+          // Reminder
+          const signOnTime = (!isRest && !isAL) ? extractSignOnTime(shift) : null
+          const hasReminder = !!(reminders && reminders[noteKey])
+
           const badgeColor = today
             ? 'var(--amber)'
             : (BADGE_COLOR[badge.type] || 'var(--muted)')
@@ -342,26 +370,93 @@ export default function RosterPage() {
               }}
               onClick={() => tappable && setSelectedShift({ entry, day, shift })}
             >
-              {/* Row 1: date + badge */}
+              {/* Row 1: date + note icon + badge */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: 6,
               }}>
-                <span style={{ fontSize:'0.78rem', color:'var(--muted)', letterSpacing:'0.03em' }}>
-                  {dateLabel}
-                </span>
-                <span style={{
-                  fontSize: '0.7rem',
-                  padding: '1px 9px',
-                  borderRadius: 10,
-                  border: `0.5px solid ${badgeColor}`,
-                  color: badgeColor,
-                  whiteSpace: 'nowrap',
-                }}>
-                  {badgeLabel}
-                </span>
+                <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                  <span style={{ fontSize:'0.78rem', color:'var(--muted)', letterSpacing:'0.03em' }}>
+                    {dateLabel}
+                  </span>
+                  {isHoliday && (
+                    <span style={{
+                      fontSize: '0.6rem',
+                      padding: '1px 5px',
+                      borderRadius: 6,
+                      background: 'rgba(248,113,113,0.15)',
+                      color: '#F87171',
+                      fontWeight: 600,
+                      letterSpacing: '0.02em',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      PH
+                    </span>
+                  )}
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  {signOnTime && (
+                    <button
+                      title={hasReminder ? 'Edit reminder' : 'Set reminder'}
+                      onClick={e => {
+                        e.stopPropagation()
+                        setReminderSheet({
+                          dateKey: noteKey,
+                          dateLabel,
+                          signOnTime,
+                          offsetMinutes: (reminders && reminders[noteKey]?.offsetMinutes) || 60,
+                        })
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '2px 3px',
+                        color: hasReminder ? 'var(--amber)' : 'var(--border)',
+                        lineHeight: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill={hasReminder ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    title={hasNote ? 'Edit note' : 'Add note'}
+                    onClick={e => {
+                      e.stopPropagation()
+                      setNoteSheet({ dateKey: noteKey, dateLabel, text: (notes && notes[noteKey]) || '' })
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '2px 3px',
+                      color: hasNote ? 'var(--amber)' : 'var(--border)',
+                      lineHeight: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill={hasNote ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    padding: '1px 9px',
+                    borderRadius: 10,
+                    border: `0.5px solid ${badgeColor}`,
+                    color: badgeColor,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {badgeLabel}
+                  </span>
+                </div>
               </div>
 
               {/* Row 2+: body */}
@@ -409,6 +504,21 @@ export default function RosterPage() {
                     </div>
                   )}
                 </>
+              )}
+              {/* Note preview */}
+              {hasNote && (
+                <div style={{
+                  marginTop: 8,
+                  paddingTop: 7,
+                  borderTop: '1px solid var(--border)',
+                  fontSize: '0.75rem',
+                  color: 'var(--amber)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  ✎ {notes[noteKey]}
+                </div>
               )}
             </div>
           )
@@ -541,11 +651,13 @@ export default function RosterPage() {
                         opacity: inRange ? 1 : 0.2,
                       }}>
                       {weekDays.map((day, di) => {
-                        const inMonth  = day.getMonth() === pickerMonth.getMonth()
-                        const isToday_ = sameDay(day, todayMidnight)
-                        const textCol  = isSelected
+                        const inMonth   = day.getMonth() === pickerMonth.getMonth()
+                        const isToday_  = sameDay(day, todayMidnight)
+                        const isHoliday = isQldHoliday(day)
+                        const textCol   = isSelected
                           ? '#0A0E1A'
                           : isToday_ ? 'var(--amber)'
+                          : isHoliday ? '#F87171'
                           : 'var(--text)'
 
                         return (
@@ -553,13 +665,18 @@ export default function RosterPage() {
                             <span style={{
                               fontSize: '0.83rem',
                               color: textCol,
-                              fontWeight: isToday_ || isSelected ? 700 : 400,
+                              fontWeight: isToday_ || isSelected || isHoliday ? 700 : 400,
                               opacity: inMonth ? 1 : 0.35,
                             }}>
                               {day.getDate()}
                             </span>
+                            {/* Today dot (amber) — only when not selected */}
                             {isToday_ && !isSelected && (
                               <div style={{ position:'absolute', bottom:2, left:'50%', transform:'translateX(-50%)', width:4, height:4, borderRadius:'50%', background:'var(--amber)' }}/>
+                            )}
+                            {/* Holiday dot (red) — only when not today and not selected */}
+                            {isHoliday && !isToday_ && !isSelected && (
+                              <div style={{ position:'absolute', bottom:2, left:'50%', transform:'translateX(-50%)', width:4, height:4, borderRadius:'50%', background:'#F87171' }}/>
                             )}
                           </div>
                         )
@@ -626,6 +743,163 @@ export default function RosterPage() {
               style={{ width:'100%', textAlign:'center' }}>
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Reminder bottom sheet ────────────────────────────────────────────── */}
+      {reminderSheet && (
+        <div
+          onClick={() => setReminderSheet(null)}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:100, display:'flex', alignItems:'flex-end' }}>
+          <div
+            className="slide-up"
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--surface)',
+              borderTop: '1px solid var(--border)',
+              borderRadius: '16px 16px 0 0',
+              padding: '20px',
+              width: '100%',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+            }}>
+            <div style={{ width:36, height:4, background:'var(--border)', borderRadius:2, margin:'0 auto 16px' }}/>
+            <h3 style={{ margin:'0 0 2px', fontSize:'0.95rem', fontWeight:600 }}>Shift Reminder</h3>
+            <p style={{ margin:'0 0 14px', fontSize:'0.75rem', color:'var(--muted)' }}>
+              {reminderSheet.dateLabel} · Sign-on {reminderSheet.signOnTime}
+            </p>
+
+            {notifPerm === 'denied' && (
+              <p style={{ fontSize:'0.78rem', color:'#EF4444', marginBottom:12, background:'rgba(239,68,68,0.1)', padding:'8px 10px', borderRadius:8 }}>
+                Notifications are blocked. Enable them in your browser settings.
+              </p>
+            )}
+
+            {notifPerm === 'default' && (
+              <button
+                className="btn-secondary"
+                style={{ marginBottom:14, width:'100%' }}
+                onClick={() => requestNotificationPermission().then(p => setNotifPerm(p))}>
+                Enable notifications first →
+              </button>
+            )}
+
+            {(notifPerm === 'granted' || notifPerm === 'default') && (
+              <>
+                <p style={{ margin:'0 0 8px', fontSize:'0.8rem', color:'var(--muted)' }}>Notify me before sign-on:</p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
+                  {[15, 30, 60, 120].map(mins => (
+                    <button
+                      key={mins}
+                      onClick={() => setReminderSheet(s => ({ ...s, offsetMinutes: mins }))}
+                      style={{
+                        padding: '10px',
+                        borderRadius: 8,
+                        border: `1px solid ${reminderSheet.offsetMinutes === mins ? 'var(--amber)' : 'var(--border)'}`,
+                        background: reminderSheet.offsetMinutes === mins ? 'rgba(245,158,11,0.15)' : 'var(--surface2)',
+                        color: reminderSheet.offsetMinutes === mins ? 'var(--amber)' : 'var(--text)',
+                        fontWeight: reminderSheet.offsetMinutes === mins ? 600 : 400,
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                      }}>
+                      {mins < 60 ? `${mins} min` : `${mins / 60}h before`}
+                    </button>
+                  ))}
+                </div>
+                <p style={{ margin:'0 0 14px', fontSize:'0.68rem', color:'var(--muted)', textAlign:'center' }}>
+                  Fires while browser is open
+                </p>
+              </>
+            )}
+
+            <div style={{ display:'flex', gap:8 }}>
+              {notifPerm === 'granted' && (
+                <button
+                  className="btn-primary"
+                  style={{ flex:1 }}
+                  onClick={() => {
+                    setReminder(reminderSheet.dateKey, { offsetMinutes: reminderSheet.offsetMinutes, signOnTime: reminderSheet.signOnTime })
+                    setReminderSheet(null)
+                  }}>
+                  Set Reminder
+                </button>
+              )}
+              {reminders && reminders[reminderSheet.dateKey] && (
+                <button
+                  className="btn-secondary"
+                  style={{ color:'#EF4444', borderColor:'#7F1D1D' }}
+                  onClick={() => { clearReminder(reminderSheet.dateKey); setReminderSheet(null) }}>
+                  Clear
+                </button>
+              )}
+              <button className="btn-ghost" onClick={() => setReminderSheet(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Note bottom sheet ─────────────────────────────────────────────────── */}
+      {noteSheet && (
+        <div
+          onClick={() => { setNote(noteSheet.dateKey, noteSheet.text); setNoteSheet(null) }}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:100, display:'flex', alignItems:'flex-end' }}>
+          <div
+            className="slide-up"
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--surface)',
+              borderTop: '1px solid var(--border)',
+              borderRadius: '16px 16px 0 0',
+              padding: '20px',
+              width: '100%',
+              paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+            }}>
+            <div style={{ width:36, height:4, background:'var(--border)', borderRadius:2, margin:'0 auto 16px' }}/>
+            <h3 style={{ margin:'0 0 2px', fontSize:'0.95rem', fontWeight:600 }}>Note</h3>
+            <p style={{ margin:'0 0 12px', fontSize:'0.75rem', color:'var(--muted)' }}>{noteSheet.dateLabel}</p>
+            <textarea
+              autoFocus
+              value={noteSheet.text}
+              onChange={e => setNoteSheet(s => ({ ...s, text: e.target.value }))}
+              placeholder="Add a private note for this day…"
+              rows={4}
+              style={{
+                width: '100%',
+                background: 'var(--surface2)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: '10px 12px',
+                fontSize: '0.88rem',
+                color: 'var(--text)',
+                resize: 'none',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+                outline: 'none',
+              }}
+            />
+            <div style={{ display:'flex', gap:8, marginTop:12 }}>
+              <button
+                className="btn-primary"
+                style={{ flex:1 }}
+                onClick={() => { setNote(noteSheet.dateKey, noteSheet.text); setNoteSheet(null) }}>
+                Save
+              </button>
+              {notes && notes[noteSheet.dateKey] && (
+                <button
+                  className="btn-secondary"
+                  style={{ color:'#EF4444', borderColor:'#7F1D1D' }}
+                  onClick={() => { setNote(noteSheet.dateKey, ''); setNoteSheet(null) }}>
+                  Clear
+                </button>
+              )}
+              <button
+                className="btn-ghost"
+                onClick={() => setNoteSheet(null)}>
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

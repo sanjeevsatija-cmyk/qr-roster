@@ -105,8 +105,17 @@ function formatDate(str) {
 function loadStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [] }
-  } catch { return { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [] } }
+    const parsed = raw ? JSON.parse(raw) : {}
+    return {
+      startingLink: null,
+      swaps: {},
+      dayOverrides: {},
+      swapLog: [],
+      notes: {},
+      reminders: {},
+      ...parsed,
+    }
+  } catch { return { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {} } }
 }
 
 function saveStorage(data) {
@@ -261,6 +270,35 @@ export function RosterProvider({ children }) {
     })
   }, [persistStore])
 
+  // ── Reminders ─────────────────────────────────────────────────────────────
+  const setReminder = useCallback((dateKey, data) => {
+    persistStore(prev => ({
+      ...prev,
+      reminders: { ...prev.reminders, [dateKey]: data },
+    }))
+  }, [persistStore])
+
+  const clearReminder = useCallback((dateKey) => {
+    persistStore(prev => {
+      const reminders = { ...prev.reminders }
+      delete reminders[dateKey]
+      return { ...prev, reminders }
+    })
+  }, [persistStore])
+
+  // ── Notes ─────────────────────────────────────────────────────────────────
+  const setNote = useCallback((dateKey, text) => {
+    persistStore(prev => {
+      const notes = { ...prev.notes }
+      if (text && text.trim()) {
+        notes[dateKey] = text
+      } else {
+        delete notes[dateKey]
+      }
+      return { ...prev, notes }
+    })
+  }, [persistStore])
+
   // ── Job card search ───────────────────────────────────────────────────────
   const searchJobCards = useCallback((query) => {
     if (!query || query.length < 3) return []
@@ -284,7 +322,7 @@ export function RosterProvider({ children }) {
 
   // ── Reset everything ──────────────────────────────────────────────────────
   const resetAll = useCallback(() => {
-    const empty = { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [] }
+    const empty = { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {} }
     saveStorage(empty)
     setStore(empty)
   }, [])
@@ -297,6 +335,11 @@ export function RosterProvider({ children }) {
       recordSwap, clearSwap,
       markWeekAL, markDayAL, clearDayAL,
       swapLog: store.swapLog,
+      notes: store.notes,
+      setNote,
+      reminders: store.reminders,
+      setReminder,
+      clearReminder,
       searchJobCards, findJobCard,
       resetAll,
     }}>
