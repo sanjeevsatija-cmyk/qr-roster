@@ -165,7 +165,10 @@ export default function RosterPage() {
   })
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'var(--bg)' }}>
+    <div>
+
+      {/* ── Sticky header + week nav wrapper ────────────────────────────────── */}
+      <div style={{ position:'sticky', top:0, zIndex:20, background:'var(--bg)' }}>
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div style={{
@@ -174,7 +177,6 @@ export default function RosterPage() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        flexShrink: 0,
       }}>
         <div>
           <h1 style={{ margin:0, fontSize:'1.1rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace' }}>
@@ -203,7 +205,7 @@ export default function RosterPage() {
       </div>
 
       {/* ── Week navigation ──────────────────────────────────────────────────── */}
-      <div style={{ flexShrink:0, borderBottom:'1px solid var(--border)' }}>
+      <div style={{ borderBottom:'1px solid var(--border)' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -261,8 +263,10 @@ export default function RosterPage() {
         )}
       </div>
 
+      </div> {/* end sticky wrapper */}
+
       {/* ── Day cards ────────────────────────────────────────────────────────── */}
-      <div className="page-content" style={{ padding:'8px 12px' }}>
+      <div style={{ padding:'8px 12px' }}>
         {DAYS.map((day, i) => {
           const shift    = entry.days[day] || ''
           const today    = isToday(day)
