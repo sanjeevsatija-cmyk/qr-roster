@@ -5,13 +5,21 @@ import ShiftPill from '../components/ShiftPill'
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 export default function SwapPage() {
-  const { personalRoster, recordSwap, clearSwap, swapLog } = useRoster()
+  const { personalRoster, recordSwap, clearSwap, swapLog, recordDaySwap, clearDaySwap, daySwaps } = useRoster()
   const [selectedEntry, setSelectedEntry] = useState(null)
   const [swapLinkInput, setSwapLinkInput] = useState('')
   const [driverName, setDriverName] = useState('')
   const [error, setError] = useState('')
   const [savedMsg, setSavedMsg] = useState('')
   const [showLog, setShowLog] = useState(false)
+
+  // Individual day swap form state
+  const [dsMyDay,    setDsMyDay]    = useState('Mon')
+  const [dsTheirLink, setDsTheirLink] = useState('')
+  const [dsTheirDay,  setDsTheirDay]  = useState('Mon')
+  const [dsTheirName, setDsTheirName] = useState('')
+  const [dsError,    setDsError]    = useState('')
+  const [dsSavedMsg, setDsSavedMsg]  = useState('')
 
   // Current + future weeks only
   const upcoming = personalRoster.filter(e => !e.isPast)
@@ -21,6 +29,8 @@ export default function SwapPage() {
     setSwapLinkInput(entry.swapInfo?.swapLink !== 'AL' ? (entry.swapInfo?.swapLink || '') : '')
     setDriverName(entry.swapInfo?.driverName || '')
     setError(''); setSavedMsg('')
+    setDsMyDay('Mon'); setDsTheirLink(''); setDsTheirDay('Mon'); setDsTheirName('')
+    setDsError(''); setDsSavedMsg('')
   }
 
   const handleSwap = () => {
@@ -120,6 +130,115 @@ export default function SwapPage() {
           </div>
         </div>
       )}
+
+      {/* ── Individual day swap section ───────────────────────────────────────── */}
+      {selectedEntry && (() => {
+        const weekDaySwaps = DAYS
+          .map(day => ({ day, data: daySwaps?.[`${selectedEntry.weekKey}_${day}`] }))
+          .filter(x => x.data)
+
+        const handleDaySwap = () => {
+          const n = parseInt(dsTheirLink)
+          if (isNaN(n) || n < 1 || n > 440) { setDsError('Enter a valid link number (1–440)'); return }
+          recordDaySwap(selectedEntry, dsMyDay, n, dsTheirDay, dsTheirName.trim())
+          setDsSavedMsg(`✓ ${dsMyDay} swapped with Link ${n} ${dsTheirDay}`)
+          setDsError('')
+          setDsTheirLink(''); setDsTheirName('')
+        }
+
+        return (
+          <div style={{ marginBottom: 10 }}>
+            {/* Divider */}
+            <div style={{ display:'flex', alignItems:'center', gap:10, margin:'4px 0 10px' }}>
+              <div style={{ flex:1, height:1, background:'var(--border)' }}/>
+              <span style={{ fontSize:'0.7rem', color:'var(--muted)', whiteSpace:'nowrap', fontWeight:600, letterSpacing:'0.04em' }}>
+                INDIVIDUAL DAY SWAP
+              </span>
+              <div style={{ flex:1, height:1, background:'var(--border)' }}/>
+            </div>
+
+            <div className="card" style={{ padding:16, marginBottom:10 }}>
+              {/* My day */}
+              <div style={{ marginBottom:9 }}>
+                <label style={{ fontSize:'0.73rem', color:'var(--muted)', display:'block', marginBottom:4 }}>My day</label>
+                <select value={dsMyDay} onChange={e => { setDsMyDay(e.target.value); setDsSavedMsg(''); setDsError('') }}>
+                  {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+
+              {/* Their link + their day — side by side */}
+              <div style={{ display:'flex', gap:8, marginBottom:9 }}>
+                <div style={{ flex:1 }}>
+                  <label style={{ fontSize:'0.73rem', color:'var(--muted)', display:'block', marginBottom:4 }}>Their link number</label>
+                  <input
+                    type="number" min="1" max="440" placeholder="e.g. 42"
+                    value={dsTheirLink}
+                    onChange={e => { setDsTheirLink(e.target.value); setDsSavedMsg(''); setDsError('') }}
+                    style={{ fontFamily:'JetBrains Mono,monospace', fontSize:'1rem' }}
+                  />
+                </div>
+                <div style={{ flex:1 }}>
+                  <label style={{ fontSize:'0.73rem', color:'var(--muted)', display:'block', marginBottom:4 }}>Their day</label>
+                  <select value={dsTheirDay} onChange={e => { setDsTheirDay(e.target.value); setDsSavedMsg(''); setDsError('') }}>
+                    {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Their name */}
+              <div style={{ marginBottom:10 }}>
+                <label style={{ fontSize:'0.73rem', color:'var(--muted)', display:'block', marginBottom:4 }}>Their name (optional)</label>
+                <input
+                  type="text" placeholder="e.g. John Smith"
+                  value={dsTheirName}
+                  onChange={e => { setDsTheirName(e.target.value); setDsSavedMsg(''); setDsError('') }}
+                />
+              </div>
+
+              {dsError    && <p style={{ color:'var(--red)', fontSize:'0.8rem', margin:'0 0 8px' }}>{dsError}</p>}
+              {dsSavedMsg && <p style={{ color:'#34D399', fontSize:'0.8rem', margin:'0 0 8px' }}>{dsSavedMsg}</p>}
+
+              <button className="btn-primary" onClick={handleDaySwap}>Record Day Swap</button>
+            </div>
+
+            {/* Existing day swaps for this week */}
+            {weekDaySwaps.length > 0 && (
+              <div className="card" style={{ padding:'10px 14px' }}>
+                <div style={{ fontSize:'0.75rem', fontWeight:600, color:'var(--muted)', marginBottom:8 }}>
+                  Day swaps this week
+                </div>
+                {weekDaySwaps.map(({ day, data }) => (
+                  <div key={day} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingBottom: 8,
+                    marginBottom: 8,
+                    borderBottom: '1px solid var(--border)',
+                  }}>
+                    <div>
+                      <span style={{ fontFamily:'JetBrains Mono,monospace', fontSize:'0.78rem', color:'#60A5FA' }}>
+                        {day} ↔ Link {data.swapLink} {data.swapDay}
+                      </span>
+                      {data.driverName && (
+                        <span style={{ fontSize:'0.72rem', color:'var(--muted)', marginLeft:6 }}>
+                          · {data.driverName}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      className="btn-ghost"
+                      style={{ padding:'2px 8px', fontSize:'0.72rem', color:'var(--red)' }}
+                      onClick={() => clearDaySwap(selectedEntry, day)}>
+                      Clear
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Week list */}
       {upcoming.map(entry => {
