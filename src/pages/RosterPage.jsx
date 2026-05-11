@@ -4,7 +4,15 @@ import { useRoster, hasJobCard, classifyShift } from '../contexts/RosterContext'
 import ShiftPill from '../components/ShiftPill'
 
 const DAYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const MONTHS      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+function getMondayOf(date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  return d
+}
 
 // ─── parseShift — unchanged from original ────────────────────────────────────
 function parseShift(shift) {
@@ -108,6 +116,10 @@ export default function RosterPage() {
   const [weekOffset,    setWeekOffset]    = useState(0)
   const [selectedShift, setSelectedShift] = useState(null)
   const [showSettings,  setShowSettings]  = useState(false)
+  const [showWeekPicker, setShowWeekPicker] = useState(false)
+  const [pickerMonth,    setPickerMonth]    = useState(() => {
+    const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1)
+  })
   const [dark, toggleDark] = useDarkMode()
 
   // Find the current week's index inside the pre-built personalRoster array.
@@ -150,6 +162,24 @@ export default function RosterPage() {
 
   const canPrev = displayIdx > 0
   const canNext = displayIdx < personalRoster.length - 1
+
+  const handleWeekSelect = (monday) => {
+    const idx = personalRoster.findIndex(e => {
+      const m = e.monday
+      return m.getFullYear() === monday.getFullYear() &&
+             m.getMonth()    === monday.getMonth()    &&
+             m.getDate()     === monday.getDate()
+    })
+    if (idx >= 0) {
+      setWeekOffset(idx - currentWeekIdx)
+      setShowWeekPicker(false)
+    }
+  }
+
+  const openPicker = () => {
+    setPickerMonth(new Date(entry.monday.getFullYear(), entry.monday.getMonth(), 1))
+    setShowWeekPicker(true)
+  }
 
   const navBtnStyle = disabled => ({
     background: 'var(--surface)',
@@ -221,7 +251,9 @@ export default function RosterPage() {
             ‹
           </button>
 
-          <div style={{ textAlign:'center', flex:1, minWidth:0 }}>
+          <button
+            onClick={openPicker}
+            style={{ textAlign:'center', flex:1, minWidth:0, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
             <div style={{
               fontSize: '0.88rem',
               fontWeight: 600,
@@ -229,8 +261,15 @@ export default function RosterPage() {
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 5,
             }}>
               {weekLabel}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity:0.45, flexShrink:0 }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
             </div>
             <div style={{ fontSize:'0.68rem', color:'var(--muted)', marginTop:1 }}>
               Link {entry.linkNum}
@@ -238,7 +277,7 @@ export default function RosterPage() {
                 <span style={{ color:'var(--green)', marginLeft:6 }}>● This week</span>
               )}
             </div>
-          </div>
+          </button>
 
           <button
             style={navBtnStyle(!canNext)}
@@ -421,6 +460,130 @@ export default function RosterPage() {
           </div>
         </div>
       )}
+
+      {/* ── Week picker modal ─────────────────────────────────────────────────── */}
+      {showWeekPicker && (() => {
+        const firstDay    = new Date(pickerMonth.getFullYear(), pickerMonth.getMonth(), 1)
+        const firstMonday = getMondayOf(firstDay)
+        const calWeeks    = Array.from({ length: 6 }, (_, wi) =>
+          Array.from({ length: 7 }, (_, di) => {
+            const d = new Date(firstMonday)
+            d.setDate(firstMonday.getDate() + wi * 7 + di)
+            return d
+          })
+        )
+        const rosterStart    = personalRoster[0]?.monday
+        const rosterEnd      = personalRoster[personalRoster.length - 1]?.monday
+        const currentMonday  = personalRoster[currentWeekIdx]?.monday
+        const selectedMonday = entry.monday
+        const todayMidnight  = new Date(); todayMidnight.setHours(0,0,0,0)
+
+        const sameDay = (a, b) => a && b &&
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth()    === b.getMonth()    &&
+          a.getDate()     === b.getDate()
+
+        const prevMonth = () => setPickerMonth(p => new Date(p.getFullYear(), p.getMonth() - 1, 1))
+        const nextMonth = () => setPickerMonth(p => new Date(p.getFullYear(), p.getMonth() + 1, 1))
+
+        return (
+          <div onClick={() => setShowWeekPicker(false)}
+            style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:100, display:'flex', alignItems:'flex-end' }}>
+            <div className="slide-up" onClick={e => e.stopPropagation()}
+              style={{ background:'var(--surface)', borderTop:'1px solid var(--border)', borderRadius:'16px 16px 0 0', width:'100%', paddingBottom:'calc(16px + env(safe-area-inset-bottom,0px))' }}>
+
+              {/* Drag handle */}
+              <div style={{ display:'flex', justifyContent:'center', padding:'12px 0 8px' }}>
+                <div style={{ width:36, height:4, background:'var(--border)', borderRadius:2 }}/>
+              </div>
+
+              {/* Month navigation */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px 10px' }}>
+                <button onClick={prevMonth}
+                  style={{ background:'var(--surface2)', border:'none', borderRadius:8, padding:'6px 14px', cursor:'pointer', color:'var(--text)', fontSize:'1.1rem', lineHeight:1 }}>
+                  ‹
+                </button>
+                <span style={{ fontWeight:600, fontSize:'0.95rem', color:'var(--text)' }}>
+                  {MONTHS_FULL[pickerMonth.getMonth()]} {pickerMonth.getFullYear()}
+                </span>
+                <button onClick={nextMonth}
+                  style={{ background:'var(--surface2)', border:'none', borderRadius:8, padding:'6px 14px', cursor:'pointer', color:'var(--text)', fontSize:'1.1rem', lineHeight:1 }}>
+                  ›
+                </button>
+              </div>
+
+              {/* Day-of-week headers */}
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', padding:'0 12px 4px' }}>
+                {['M','T','W','T','F','S','S'].map((d, i) => (
+                  <div key={i} style={{ textAlign:'center', fontSize:'0.68rem', color:'var(--muted)', fontWeight:600, paddingBottom:4 }}>{d}</div>
+                ))}
+              </div>
+
+              {/* Week rows — each full row is a tappable week */}
+              <div style={{ padding:'0 12px' }}>
+                {calWeeks.map((weekDays, wi) => {
+                  const rowMonday  = weekDays[0]
+                  const inRange    = rosterStart && rosterEnd && rowMonday >= rosterStart && rowMonday <= rosterEnd
+                  const isSelected = sameDay(rowMonday, selectedMonday)
+                  const isCurrWk   = sameDay(rowMonday, currentMonday)
+
+                  return (
+                    <div key={wi}
+                      onClick={() => inRange && handleWeekSelect(rowMonday)}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(7,1fr)',
+                        borderRadius: 8,
+                        marginBottom: 2,
+                        background: isSelected ? 'var(--amber)' : isCurrWk ? 'var(--today-bg)' : 'transparent',
+                        border: isCurrWk && !isSelected ? '1px solid var(--today-bdr)' : '1px solid transparent',
+                        cursor: inRange ? 'pointer' : 'default',
+                        opacity: inRange ? 1 : 0.2,
+                      }}>
+                      {weekDays.map((day, di) => {
+                        const inMonth  = day.getMonth() === pickerMonth.getMonth()
+                        const isToday_ = sameDay(day, todayMidnight)
+                        const textCol  = isSelected
+                          ? '#0A0E1A'
+                          : isToday_ ? 'var(--amber)'
+                          : 'var(--text)'
+
+                        return (
+                          <div key={di} style={{ textAlign:'center', padding:'7px 0', position:'relative' }}>
+                            <span style={{
+                              fontSize: '0.83rem',
+                              color: textCol,
+                              fontWeight: isToday_ || isSelected ? 700 : 400,
+                              opacity: inMonth ? 1 : 0.35,
+                            }}>
+                              {day.getDate()}
+                            </span>
+                            {isToday_ && !isSelected && (
+                              <div style={{ position:'absolute', bottom:2, left:'50%', transform:'translateX(-50%)', width:4, height:4, borderRadius:'50%', background:'var(--amber)' }}/>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Jump to this week shortcut */}
+              {!entry.isCurrent && (
+                <div style={{ padding:'10px 16px 0' }}>
+                  <button
+                    className="btn-secondary"
+                    style={{ textAlign:'center' }}
+                    onClick={() => { setWeekOffset(0); setShowWeekPicker(false) }}>
+                    Jump to this week
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── Settings modal — unchanged from original ──────────────────────────── */}
       {showSettings && (
