@@ -48,7 +48,7 @@ export default function JobCardPage() {
       {!selected && results.map((card, i) => (
         <button key={i} onClick={() => setSelected(card)}
           style={{ display:'block', width:'100%', textAlign:'left', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', marginBottom:5, cursor:'pointer' }}>
-          <span className="shift-code" style={{ fontSize:'0.77rem', color:'#F1F5F9' }}>{card.header}</span>
+          <span className="shift-code" style={{ fontSize:'0.77rem', color:'var(--text)' }}>{card.header}</span>
         </button>
       ))}
 
@@ -59,7 +59,7 @@ export default function JobCardPage() {
 
       {/* Pre-shift not found */}
       {preShift && !selected && !query && (
-        <div style={{ background:'#1A1500', border:'1px solid #92620A', borderRadius:10, padding:12, marginBottom:12 }}>
+        <div style={{ background:'var(--surface2)', border:'1px solid var(--amber-dim)', borderRadius:10, padding:12, marginBottom:12 }}>
           <p style={{ color:'#F59E0B', fontSize:'0.8rem', margin:0 }}>
             Searching for: <span className="shift-code">{preShift}</span>
           </p>
@@ -122,7 +122,7 @@ export default function JobCardPage() {
                   }
                 </div>
                 <div>
-                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color: leg._signOn || leg._signOff ? '#34D399' : '#BEF264', marginBottom:2 }}>{leg.trainNo}</div>}
+                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color: leg._signOn || leg._signOff ? '#34D399' : 'var(--text)', marginBottom:2 }}>{leg.trainNo}</div>}
                   {(leg.centralArrive || leg.centralDepart) && (
                     <div className="time-display" style={{ fontSize:'0.7rem', color:'var(--muted)', marginBottom:2 }}>
                       {leg.centralArrive && `↓ Cen ${leg.centralArrive}`}
