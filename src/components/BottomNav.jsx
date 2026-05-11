@@ -27,7 +27,7 @@ export default function BottomNav() {
       {TABS.map(tab => {
         const active = location.pathname === tab.path
         return (
-          <button key={tab.path} onClick={() => navigate(tab.path)}
+          <button key={tab.path} onClick={() => navigate(tab.path, { replace: true })}
             style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'8px 0 4px' }}>
             {tab.icon(active)}
             <span style={{ fontSize:'0.65rem', fontWeight: active?600:400, color: active?'#F59E0B':'#64748B', fontFamily:'DM Sans,sans-serif' }}>
