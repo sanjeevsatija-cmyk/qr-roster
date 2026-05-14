@@ -8,7 +8,18 @@ import JobCardPage from './pages/JobCardPage'
 import SwapPage from './pages/SwapPage'
 import LeavePage from './pages/LeavePage'
 import ContactsPage from './pages/ContactsPage'
+import TrialExpiredPage from './pages/TrialExpiredPage'
 import BottomNav from './components/BottomNav'
+
+const TRIAL_ENDS = new Date('2026-05-28T23:59:59')
+
+function isLicenced() {
+  return localStorage.getItem('qr_licence') === 'master'
+}
+
+function isTrialExpired() {
+  return new Date() > TRIAL_ENDS
+}
 
 function AppInner() {
   const { startingLink, reminders } = useRoster()
@@ -34,6 +45,10 @@ function AppInner() {
 }
 
 export default function App() {
+  if (!isLicenced() && isTrialExpired()) {
+    return <TrialExpiredPage />
+  }
+
   return (
     <RosterProvider>
       <AppInner />
