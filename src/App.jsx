@@ -22,19 +22,6 @@ import AboutPage from './pages/AboutPage'
 
 const TRIAL_ENDS = new Date('2026-05-28T23:59:59')
 
-const TRIAL_KEY_EXPIRY = new Date('2026-05-28T23:59:59')
-
-function isLicenced() {
-  const licence = localStorage.getItem('qr_licence')
-  if (licence === 'master') return true
-  if (licence === 'trial') return new Date() <= TRIAL_KEY_EXPIRY
-  return false
-}
-
-function isTrialExpired() {
-  return new Date() > TRIAL_ENDS
-}
-
 function AppInner() {
   const { startingLink, reminders } = useRoster()
   useNotifications(reminders)
@@ -60,10 +47,20 @@ function AppInner() {
 }
 
 export default function App() {
-  if (!isLicenced() && isTrialExpired()) {
+  const licence = localStorage.getItem('qr_licence')
+
+  // No licence stored at all — always show key screen
+  if (!licence) {
     return <TrialExpiredPage />
   }
 
+  // Has a trial licence — check if it has expired
+  if (licence === 'trial' && new Date() > TRIAL_ENDS) {
+    localStorage.removeItem('qr_licence')
+    return <TrialExpiredPage />
+  }
+
+  // Master key or valid trial — proceed to app
   return (
     <RosterProvider>
       <AppInner />

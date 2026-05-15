@@ -24,6 +24,8 @@ export default function TrialExpiredPage() {
   const [keyInput, setKeyInput] = useState('')
   const [error,    setError]    = useState('')
 
+  const isExpired = localStorage.getItem('qr_licence') === null && new Date() > new Date('2026-05-28T23:59:59')
+
   const handleActivate = () => {
     const trimmed = keyInput.trim()
 
@@ -92,14 +94,12 @@ export default function TrialExpiredPage() {
 
       <div className="card" style={{ width: '100%', maxWidth: 340, padding: 24 }}>
         <h2 style={{ margin: '0 0 8px', fontSize: '1rem', fontWeight: 700 }}>
-          Your free trial has ended.
+          {isExpired ? 'Trial Ended' : 'Welcome to QR Roster'}
         </h2>
-        <p style={{ margin: '0 0 4px', fontSize: '0.85rem', color: 'var(--muted)' }}>
-          Thanks for trying QR Roster!
-        </p>
         <p style={{ margin: '0 0 24px', fontSize: '0.85rem', color: 'var(--muted)' }}>
-          To continue using the app, purchase a licence for{' '}
-          <span style={{ color: 'var(--text)', fontWeight: 600 }}>$3.99</span>.
+          {isExpired
+            ? 'Your trial has ended. Purchase a licence to continue.'
+            : 'Enter your access key to get started.'}
         </p>
 
         <label style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block', marginBottom: 6 }}>
