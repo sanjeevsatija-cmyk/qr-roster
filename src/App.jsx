@@ -13,8 +13,13 @@ import BottomNav from './components/BottomNav'
 
 const TRIAL_ENDS = new Date('2026-05-28T23:59:59')
 
+const TRIAL_KEY_EXPIRY = new Date('2026-05-28T23:59:59')
+
 function isLicenced() {
-  return localStorage.getItem('qr_licence') === 'master'
+  const licence = localStorage.getItem('qr_licence')
+  if (licence === 'master') return true
+  if (licence === 'trial') return new Date() <= TRIAL_KEY_EXPIRY
+  return false
 }
 
 function isTrialExpired() {

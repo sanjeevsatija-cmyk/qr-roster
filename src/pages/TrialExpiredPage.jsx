@@ -2,6 +2,16 @@ import React, { useState } from 'react'
 
 const MASTER_KEY = 'QRDEV-2026-MASTER'
 
+const TRIAL_KEYS = [
+  'QRTEST-ALPHA-2026',
+  'QRTEST-BETA-2026',
+  'QRTEST-GAMMA-2026',
+  'QRTEST-DELTA-2026',
+  'QRTEST-EPSILON-2026',
+]
+
+const TRIAL_KEY_EXPIRY = new Date('2026-05-28T23:59:59')
+
 export default function TrialExpiredPage() {
   const [keyInput, setKeyInput] = useState('')
   const [error,    setError]    = useState('')
@@ -15,7 +25,16 @@ export default function TrialExpiredPage() {
       return
     }
 
-    // Stage 2: real Stripe licence validation will be added here.
+    if (TRIAL_KEYS.includes(trimmed)) {
+      if (new Date() <= TRIAL_KEY_EXPIRY) {
+        localStorage.setItem('qr_licence', 'trial')
+        window.location.reload()
+      } else {
+        setError('Your trial key has expired — purchase a licence to continue')
+      }
+      return
+    }
+
     setError('Invalid key — please contact Sanjeev on 0412 328 562')
   }
 
