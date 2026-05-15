@@ -45,7 +45,7 @@ export default function TrialExpiredPage() {
       return
     }
 
-    setError('Invalid key — please contact Sanjeev on 0412 328 562')
+    setError('Invalid key — please contact Sanjeev')
   }
 
   return (
@@ -140,10 +140,7 @@ export default function TrialExpiredPage() {
           textAlign: 'center',
           lineHeight: 1.5,
         }}>
-          To purchase contact Sanjeev on{' '}
-          <a href="tel:0412328562" style={{ color: 'var(--amber)', textDecoration: 'none' }}>
-            0412 328 562
-          </a>
+          
         </p>
       </div>
     </div>
