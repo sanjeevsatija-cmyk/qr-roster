@@ -1,4 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react'
+/**
+ * QR Roster — Queensland Rail Mayne Link Roster PWA
+ * Developed by Sanjeev Satija, Brisbane, Australia
+ * First created: April 2026
+ * Copyright © 2026 Sanjeev Satija. All rights reserved.
+ * Unauthorised copying, modification or distribution
+ * of this software is strictly prohibited.
+ */
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRoster, hasJobCard, classifyShift } from '../contexts/RosterContext'
 import { requestNotificationPermission, getNotificationPermission } from '../hooks/useNotifications'
@@ -141,6 +149,20 @@ export default function RosterPage() {
   })
   const [dark, toggleDark] = useDarkMode()
 
+  const tapCountRef = useRef(0)
+  const tapTimerRef = useRef(null)
+
+  const handleTitleTap = () => {
+    tapCountRef.current += 1
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current)
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0 }, 3000)
+    if (tapCountRef.current >= 7) {
+      tapCountRef.current = 0
+      clearTimeout(tapTimerRef.current)
+      navigate('/about')
+    }
+  }
+
   // Find the current week's index inside the pre-built personalRoster array.
   // weekOffset=0 → current week, negative=past, positive=future.
   const currentWeekIdx = useMemo(
@@ -228,7 +250,7 @@ export default function RosterPage() {
         alignItems: 'center',
       }}>
         <div>
-          <h1 style={{ margin:0, fontSize:'1.1rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace' }}>
+          <h1 onClick={handleTitleTap} style={{ margin:0, fontSize:'1.1rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace', cursor:'default', userSelect:'none' }}>
             <span style={{ color:'var(--amber)' }}>QR</span> Roster
           </h1>
           <p style={{ margin:0, fontSize:'0.72rem', color:'var(--muted)' }}>

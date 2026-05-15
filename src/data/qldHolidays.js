@@ -1,3 +1,11 @@
+/**
+ * QR Roster — Queensland Rail Mayne Link Roster PWA
+ * Developed by Sanjeev Satija, Brisbane, Australia
+ * First created: April 2026
+ * Copyright © 2026 Sanjeev Satija. All rights reserved.
+ * Unauthorised copying, modification or distribution
+ * of this software is strictly prohibited.
+ */
 // Queensland public holidays 2026–2027 (hardcoded).
 // Ekka (Royal Queensland Show) dates are estimates — officially announced annually by the RNA.
 // Sources: Queensland Government Holidays Act 1983; QLD public holidays calendar.

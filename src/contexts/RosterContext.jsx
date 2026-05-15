@@ -1,3 +1,11 @@
+/**
+ * QR Roster — Queensland Rail Mayne Link Roster PWA
+ * Developed by Sanjeev Satija, Brisbane, Australia
+ * First created: April 2026
+ * Copyright © 2026 Sanjeev Satija. All rights reserved.
+ * Unauthorised copying, modification or distribution
+ * of this software is strictly prohibited.
+ */
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import rosterData from '../data/roster.json'
 import jobCardsData from '../data/jobcards.json'
