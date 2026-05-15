@@ -121,9 +121,10 @@ function loadStorage() {
       swapLog: [],
       notes: {},
       reminders: {},
+      daySwaps: {},
       ...parsed,
     }
-  } catch { return { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {} } }
+  } catch { return { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {}, daySwaps: {} } }
 }
 
 function saveStorage(data) {
@@ -193,6 +194,24 @@ export function RosterProvider({ children }) {
         })
       }
 
+      // Apply individual day swaps on top of week-level swap; AL overrides still win
+      const daySwapInfo = {}
+      const daySwapKeys = DAYS.filter(d => store.daySwaps[`${wk}_${d}`])
+      if (daySwapKeys.length > 0) {
+        displayDays = { ...displayDays }
+        daySwapKeys.forEach(d => {
+          const ds = store.daySwaps[`${wk}_${d}`]
+          daySwapInfo[d] = ds
+          const slIdx = ds.swapLink - 1
+          if (slIdx >= 0 && slIdx < TOTAL_LINKS) {
+            displayDays[d] = rosterData[slIdx].days[ds.swapDay] || ''
+          }
+        })
+        DAYS.forEach(d => {
+          if (store.dayOverrides[`${wk}_${d}`]) displayDays[d] = 'AL'
+        })
+      }
+
       // Compute the actual week date from monday (not from base.date which is wrong)
       const dateStr = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`
 
@@ -215,11 +234,12 @@ export function RosterProvider({ children }) {
         days: displayDays,
         originalDays: days,
         swapInfo,
+        daySwapInfo,
         isCurrent: wk === currentWK,
         isPast: monday < thisMon,
       }
     })
-  }, [store.startingLink, store.swaps, store.dayOverrides])
+  }, [store.startingLink, store.swaps, store.dayOverrides, store.daySwaps])
 
   // ── Record swap ────────────────────────────────────────────────────────────
   const recordSwap = useCallback((weekEntry, swapLinkNum, driverName = '') => {
@@ -278,6 +298,27 @@ export function RosterProvider({ children }) {
     })
   }, [persistStore])
 
+  // ── Individual day swaps ──────────────────────────────────────────────────
+  const recordDaySwap = useCallback((weekEntry, myDay, swapLink, swapDay, driverName = '') => {
+    const key = `${weekEntry.weekKey}_${myDay}`
+    persistStore(prev => ({
+      ...prev,
+      daySwaps: {
+        ...prev.daySwaps,
+        [key]: { swapLink: parseInt(swapLink), swapDay, driverName }
+      }
+    }))
+  }, [persistStore])
+
+  const clearDaySwap = useCallback((weekEntry, day) => {
+    const key = `${weekEntry.weekKey}_${day}`
+    persistStore(prev => {
+      const daySwaps = { ...prev.daySwaps }
+      delete daySwaps[key]
+      return { ...prev, daySwaps }
+    })
+  }, [persistStore])
+
   // ── Reminders ─────────────────────────────────────────────────────────────
   const setReminder = useCallback((dateKey, data) => {
     persistStore(prev => ({
@@ -330,7 +371,7 @@ export function RosterProvider({ children }) {
 
   // ── Reset everything ──────────────────────────────────────────────────────
   const resetAll = useCallback(() => {
-    const empty = { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {} }
+    const empty = { startingLink: null, swaps: {}, dayOverrides: {}, swapLog: [], notes: {}, reminders: {}, daySwaps: {} }
     saveStorage(empty)
     setStore(empty)
   }, [])
@@ -342,6 +383,8 @@ export function RosterProvider({ children }) {
       personalRoster,
       recordSwap, clearSwap,
       markWeekAL, markDayAL, clearDayAL,
+      recordDaySwap, clearDaySwap,
+      daySwaps: store.daySwaps,
       swapLog: store.swapLog,
       notes: store.notes,
       setNote,

@@ -369,6 +369,7 @@ export default function RosterPage() {
           const noteKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth()+1).padStart(2,'0')}-${String(dayDate.getDate()).padStart(2,'0')}`
           const hasNote    = !!(notes && notes[noteKey])
           const isHoliday  = isQldHoliday(dayDate)
+          const daySwap    = entry.daySwapInfo?.[day] || null
 
           // Reminder
           const signOnTime = (!isRest && !isAL) ? extractSignOnTime(shift) : null
@@ -531,6 +532,13 @@ export default function RosterPage() {
                   )}
                 </>
               )}
+              {/* Individual day swap indicator */}
+              {daySwap && (
+                <div style={{ marginTop:5, fontSize:'0.72rem', color:'#60A5FA' }}>
+                  ↔ {daySwap.driverName || `Link ${daySwap.swapLink}`}
+                </div>
+              )}
+
               {/* Note preview */}
               {hasNote && (
                 <div style={{
