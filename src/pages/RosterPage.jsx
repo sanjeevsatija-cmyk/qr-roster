@@ -6,7 +6,7 @@
  * Unauthorised copying, modification or distribution
  * of this software is strictly prohibited.
  */
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRoster, hasJobCard, classifyShift } from '../contexts/RosterContext'
 import { requestNotificationPermission, getNotificationPermission } from '../hooks/useNotifications'
@@ -149,16 +149,19 @@ export default function RosterPage() {
   })
   const [dark, toggleDark] = useDarkMode()
 
-  const tapCountRef = useRef(0)
-  const tapTimerRef = useRef(null)
+  const [tapCount, setTapCount] = useState(0)
+  const [lastTap,  setLastTap]  = useState(0)
 
   const handleTitleTap = () => {
-    tapCountRef.current += 1
-    if (tapTimerRef.current) clearTimeout(tapTimerRef.current)
-    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0 }, 3000)
-    if (tapCountRef.current >= 7) {
-      tapCountRef.current = 0
-      clearTimeout(tapTimerRef.current)
+    const now = Date.now()
+    if (now - lastTap > 3000) {
+      setTapCount(1)
+    } else {
+      setTapCount(prev => prev + 1)
+    }
+    setLastTap(now)
+    if (tapCount + 1 >= 7) {
+      setTapCount(0)
       navigate('/about')
     }
   }
