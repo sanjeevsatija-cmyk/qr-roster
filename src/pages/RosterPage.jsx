@@ -378,6 +378,7 @@ export default function RosterPage() {
           const badgeColor = today
             ? 'var(--amber)'
             : (BADGE_COLOR[badge.type] || 'var(--muted)')
+          const badgeTextColor = (!today && badge.type === 'al') ? 'var(--text)' : badgeColor
           const badgeLabel = today ? 'Today' : badge.label
 
           return (
@@ -478,7 +479,7 @@ export default function RosterPage() {
                     padding: '1px 9px',
                     borderRadius: 10,
                     border: `0.5px solid ${badgeColor}`,
-                    color: badgeColor,
+                    color: badgeTextColor,
                     whiteSpace: 'nowrap',
                   }}>
                     {badgeLabel}
