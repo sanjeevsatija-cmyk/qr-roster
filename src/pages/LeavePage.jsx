@@ -56,7 +56,7 @@ export default function LeavePage() {
 
       {/* AL panel */}
       {syncedEntry && (
-        <div className="card slide-up" style={{ padding:16, marginBottom:10 }}>
+        <div className="card slide-up" style={{ padding:16, marginBottom:10, overflow:'hidden' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
             <div>
               <span className="shift-code" style={{ color:'#F59E0B', fontSize:'0.8rem' }}>Link {syncedEntry.linkNum}</span>
@@ -76,14 +76,14 @@ export default function LeavePage() {
 
           <div style={{ fontSize:'0.7rem', color:'#64748B', marginBottom:8, textAlign:'center' }}>— or toggle individual days —</div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:5 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:5, overflowX:'auto' }}>
             {DAYS.map(day => {
               const shift = syncedEntry.days[day] || ''
               const isAL = shift === 'AL' || shift === 'Annual Leave'
               return (
-                <div key={day} style={{ textAlign:'center' }}>
+                <div key={day} style={{ textAlign:'center', minWidth:0, overflow:'hidden' }}>
                   <div style={{ fontSize:'0.58rem', color:'#64748B', marginBottom:2 }}>{day}</div>
-                  <div style={{ marginBottom:4 }}><ShiftPill shift={shift} compact /></div>
+                  <div style={{ marginBottom:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}><ShiftPill shift={shift} compact /></div>
                   <button onClick={() => handleToggleDayAL(day)}
                     style={{ width:'100%', padding:'3px 2px', fontSize:'0.6rem', borderRadius:5, border:`1px solid ${isAL ? '#065F46' : '#374151'}`, background: isAL ? '#0A2417' : 'var(--surface2)', color: isAL ? '#34D399' : '#64748B', cursor:'pointer', fontFamily:'DM Sans,sans-serif' }}>
                     {isAL ? '✓ AL' : '+ AL'}

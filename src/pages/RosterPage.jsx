@@ -89,7 +89,7 @@ function getShiftBadge(shift) {
 // 'early', 'late', 'night' are new for regular working shifts.
 const BADGE_COLOR = {
   rest:  'var(--muted)',
-  al:    '#6EE7B7',
+  al:    'var(--green)',
   blp:   '#64748B',
   slp:   '#60A5FA',
   spare: '#A78BFA',
@@ -492,7 +492,7 @@ export default function RosterPage() {
                   Rest day
                 </div>
               ) : isAL ? (
-                <div style={{ fontSize:'0.88rem', color:'#6EE7B7', fontStyle:'italic' }}>
+                <div style={{ fontSize:'0.88rem', color:'var(--text)', fontStyle:'italic' }}>
                   Annual leave
                 </div>
               ) : (
