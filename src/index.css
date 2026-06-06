@@ -1,49 +1,26 @@
-/*
- * QR Roster — Queensland Rail Mayne Link Roster PWA
- * Developed by Sanjeev Satija, Brisbane, Australia
- * First created: April 2026
- * Copyright © 2026 Sanjeev Satija. All rights reserved.
- * Unauthorised copying, modification or distribution
- * of this software is strictly prohibited.
- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root, [data-theme="dark"] {
-  --bg:        #0A0E1A;
-  --surface:   #111827;
-  --surface2:  #1A2744;
-  --border:    #1F2D47;
-  --amber:     #F59E0B;
-  --amber-dim: #92620A;
-  --green:     #10B981;
-  --red:       #EF4444;
-  --text:      #F1F5F9;
-  --muted:     #94A3B8;
-  --today-bg:  #1A1E0A;
-  --today-bdr: #4D5520;
-  --today-txt: #BEF264;
-  --card-shadow: none;
-  --nav-h:     64px;
-  --safe-b:    env(safe-area-inset-bottom, 0px);
-}
-
-[data-theme="light"] {
-  --bg:        #EEF2F7;
-  --surface:   #FFFFFF;
-  --surface2:  #E9EEF5;
-  --border:    #C5D0DF;
-  --amber:     #D97706;
-  --amber-dim: #92400E;
-  --green:     #059669;
-  --red:       #DC2626;
-  --text:      #0F172A;
-  --muted:     #1E293B;
-  --today-bg:  #FDE68A;
-  --today-bdr: #B45309;
-  --today-txt: #78350F;
-  --card-shadow: 0 1px 4px rgba(0,0,0,0.10);
+:root {
+  --bg:          #12060E;
+  --surface:     #1E0D18;
+  --surface2:    #2A1020;
+  --border:      rgba(249,168,212,0.15);
+  --acc:         #F9A8D4;
+  --acc2:        #FBCFE8;
+  --acc3:        #EC4899;
+  --gold:        #FCD34D;
+  --gold2:       #F59E0B;
+  --mint:        #6EE7B7;
+  --lav:         #C4B5FD;
+  --muted:       #7A4A62;
+  --muted2:      #3D1A2E;
+  --text:        #F5E6EF;
+  --glass:       rgba(249,168,212,0.06);
+  --glassborder: rgba(249,168,212,0.18);
+  --nav-h:       64px;
+  --safe-b:      env(safe-area-inset-bottom, 0px);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -65,6 +42,7 @@ html, body {
   overflow: hidden;
 }
 
+/* Scrollable content area above bottom nav */
 .page-content {
   flex: 1;
   overflow-y: auto;
@@ -73,10 +51,12 @@ html, body {
   padding-bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
 }
 
+/* Scrollbar styling */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* Shift code typography */
 .shift-code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
@@ -88,58 +68,94 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Card surfaces */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: var(--card-shadow);
 }
 
-/* Shift badge colours — dark mode (default) */
-.badge-blp  { background:#1E293B; color:#64748B; }
-.badge-slp  { background:#1E2A3A; color:#60A5FA; }
-.badge-afp  { background:#1C2B20; color:#34D399; }
-.badge-al   { background:#1C2B20; color:#6EE7B7; }
-.badge-spare{ background:#1A1A2E; color:#A78BFA; }
-.badge-eb   { background:#1A1E0F; color:#BEF264; }
-.badge-ef   { background:#1A200F; color:#A3E635; }
-.badge-tr   { background:#1A1830; color:#93C5FD; }
-.badge-cs   { background:#1E1A10; color:#FCD34D; }
-.badge-other{ background:#1A1520; color:#E879F9; }
+.card-inner {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
 
-/* Light mode badge overrides */
-[data-theme="light"] .badge-blp  { background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; }
-[data-theme="light"] .badge-slp  { background:#EFF6FF; color:#1D4ED8; }
-[data-theme="light"] .badge-afp  { background:#F0FDF4; color:#166534; }
-[data-theme="light"] .badge-al   { background:#F0FDF4; color:#166534; }
-[data-theme="light"] .badge-spare{ background:#F5F3FF; color:#5B21B6; }
-[data-theme="light"] .badge-eb   { background:#ECFCCB; color:#3F6212; }
-[data-theme="light"] .badge-ef   { background:#F7FEE7; color:#4D7C0F; }
-[data-theme="light"] .badge-tr   { background:#EFF6FF; color:#1E40AF; }
-[data-theme="light"] .badge-cs   { background:#FFFBEB; color:#92400E; }
-[data-theme="light"] .badge-other{ background:#FDF4FF; color:#7E22CE; }
+/* Glassmorphism utility surfaces */
+.glass-card {
+  background: rgba(249,168,212,0.06);
+  border: 1px solid rgba(249,168,212,0.18);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.glass-card-inner {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
 
+/* HUD corner accents */
+.hud-corner-tl {
+  position: absolute; top: 10px; left: 10px;
+  width: 14px; height: 14px;
+  border-top: 1.5px solid rgba(249,168,212,0.5);
+  border-left: 1.5px solid rgba(249,168,212,0.5);
+  border-radius: 3px 0 0 0;
+}
+.hud-corner-tr {
+  position: absolute; top: 10px; right: 10px;
+  width: 14px; height: 14px;
+  border-top: 1.5px solid rgba(249,168,212,0.5);
+  border-right: 1.5px solid rgba(249,168,212,0.5);
+  border-radius: 0 3px 0 0;
+}
+
+/* Rose pulse */
+@keyframes rosePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+.pulse-rose { animation: rosePulse 2s ease-in-out infinite; }
+
+/* Signal badge colours — glassmorphism rose gold palette */
+.badge-blp  { background: rgba(249,168,212,0.1); color: #F9A8D4; border: 1px solid rgba(249,168,212,0.25); }
+.badge-slp  { background: rgba(125,211,252,0.1); color: #7DD3FC; border: 1px solid rgba(125,211,252,0.25); }
+.badge-afp  { background: rgba(110,231,183,0.1); color: #6EE7B7; border: 1px solid rgba(110,231,183,0.25); }
+.badge-afa  { background: rgba(110,231,183,0.1); color: #6EE7B7; border: 1px solid rgba(110,231,183,0.25); }
+.badge-al   { background: rgba(196,181,253,0.1); color: #C4B5FD; border: 1px solid rgba(196,181,253,0.25); }
+.badge-ex   { background: rgba(252,165,165,0.1); color: #FCA5A5; border: 1px solid rgba(252,165,165,0.25); }
+.badge-pm   { background: rgba(196,181,253,0.1); color: #C4B5FD; border: 1px solid rgba(196,181,253,0.25); }
+.badge-am   { background: rgba(147,197,253,0.1); color: #93C5FD; border: 1px solid rgba(147,197,253,0.25); }
+.badge-eb   { background: rgba(190,242,100,0.1); color: #BEF264; border: 1px solid rgba(190,242,100,0.25); }
+.badge-ef   { background: rgba(163,230,53,0.1);  color: #A3E635; border: 1px solid rgba(163,230,53,0.25); }
+.badge-other{ background: rgba(232,121,249,0.1); color: #E879F9; border: 1px solid rgba(232,121,249,0.25); }
+
+/* Animated pulse for current week */
 @keyframes pulse-border {
-  0%,100% { border-color: var(--amber); }
-  50%      { border-color: var(--amber-dim); }
+  0%, 100% { border-color: var(--acc); }
+  50% { border-color: var(--muted); }
 }
 .current-week-border {
   animation: pulse-border 2s ease-in-out infinite;
   border-width: 2px !important;
 }
 
+/* Slide up animation for modals */
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
 .slide-up { animation: slideUp 0.25s ease-out; }
 
+/* Fade in */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .fade-in { animation: fadeIn 0.2s ease-out; }
 
+/* Bottom nav */
 .bottom-nav {
   height: calc(var(--nav-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
@@ -152,6 +168,7 @@ html, body {
   z-index: 50;
 }
 
+/* Input styling */
 input, select, textarea {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -164,11 +181,14 @@ input, select, textarea {
   width: 100%;
   transition: border-color 0.15s;
 }
-input:focus, select:focus { border-color: var(--amber); }
+input:focus, select:focus {
+  border-color: var(--acc);
+}
 
+/* Button */
 .btn-primary {
-  background: var(--amber);
-  color: #0A0E1A;
+  background: var(--acc3);
+  color: #12060E;
   font-weight: 700;
   font-size: 0.9rem;
   border: none;
@@ -178,13 +198,9 @@ input:focus, select:focus { border-color: var(--amber); }
   transition: opacity 0.15s, transform 0.1s;
   width: 100%;
   font-family: 'DM Sans', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
-.btn-primary:active  { transform: scale(0.98); opacity: 0.9; }
-.btn-primary:disabled{ opacity: 0.4; cursor: not-allowed; }
+.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-secondary {
   background: var(--surface2);
@@ -211,12 +227,22 @@ input:focus, select:focus { border-color: var(--amber); }
   padding: 8px 12px;
 }
 
+/* Loading spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   border: 2px solid var(--border);
-  border-top-color: var(--amber);
+  border-top-color: var(--acc);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  display: inline-block;
+}
+
+/* Track line for job card steps */
+.track-line {
+  width: 2px;
+  background: linear-gradient(to bottom, var(--acc), var(--border));
+  position: absolute;
+  left: 11px;
+  top: 20px;
+  bottom: 0;
 }
