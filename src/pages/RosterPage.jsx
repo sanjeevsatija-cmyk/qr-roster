@@ -283,8 +283,8 @@ export default function RosterPage() {
                 Link {startingLink}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 7 }}>
-                <div className="pulse-rose" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--acc)', flexShrink: 0 }}/>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'var(--acc)', letterSpacing: '0.2em' }}>LIVE</span>
+                <div className="pulse-rose" style={{ width: 6, height: 6, borderRadius: '50%', background: '#F9A8D4', boxShadow: '0 0 6px rgba(249,168,212,0.8)', flexShrink: 0 }}/>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#F9A8D4', letterSpacing: '0.2em' }}>LIVE</span>
               </div>
             </div>
 
@@ -387,14 +387,14 @@ export default function RosterPage() {
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                   padding: '8px 2px 6px', borderRadius: 10,
-                  border: today ? '1px solid var(--acc)' : selected ? '1px solid var(--acc2)' : '1px solid rgba(255,255,255,0.08)',
-                  background: today ? 'rgba(249,168,212,0.1)' : selected ? 'rgba(249,168,212,0.15)' : 'rgba(255,255,255,0.04)',
+                  border: today ? '1px solid rgba(249,168,212,0.8)' : selected ? '2px solid rgba(249,168,212,1)' : '1px solid rgba(255,255,255,0.08)',
+                  background: today ? 'rgba(249,168,212,0.15)' : selected ? 'rgba(249,168,212,0.15)' : 'rgba(255,255,255,0.04)',
                   cursor: 'pointer', opacity: (past && !today) ? 0.3 : 1, outline: 'none', transition: 'all 0.15s',
                 }}>
-                <span style={{ fontSize: '0.52rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1 }}>
+                <span style={{ fontSize: '0.52rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '1.5px', textTransform: 'uppercase', lineHeight: 1 }}>
                   {day}
                 </span>
-                <span style={{ fontSize: '1rem', fontWeight: 700, color: (today || selected) ? 'var(--acc)' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', lineHeight: 1.2 }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: (today || selected) ? 'var(--acc)' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', lineHeight: 1.2 }}>
                   {dayDate.getDate()}
                 </span>
                 <div style={{ width: 4, height: 4, borderRadius: '50%', background: dayHasNote ? 'var(--gold)' : 'transparent' }}/>
@@ -409,7 +409,7 @@ export default function RosterPage() {
           {/* Top row: shift code + ShiftPill + bell */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
             <div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.75rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '0.04em', lineHeight: 1 }}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 36, fontWeight: 700, color: '#FFFFFF', letterSpacing: '0.04em', lineHeight: 1 }}>
                 {hasEx && <span style={{ fontSize: '1rem', opacity: 0.5, marginRight: 4 }}>EX/</span>}
                 {isRest ? 'REST' : isAL ? 'AL' : code}
               </div>
@@ -438,17 +438,17 @@ export default function RosterPage() {
           {isWorkShift && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
               <div className="glass-card-inner" style={{ padding: '10px 12px' }}>
-                <div style={{ fontSize: '0.55rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>SIGN ON</div>
-                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text)' }}>{signOn || '—'}</div>
+                <div style={{ fontSize: '0.55rem', color: '#F9A8D4', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>SIGN ON</div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 600, color: '#FFFFFF' }}>{signOn || '—'}</div>
               </div>
               <div className="glass-card-inner" style={{ padding: '10px 12px' }}>
-                <div style={{ fontSize: '0.55rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>SIGN OFF</div>
-                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text)' }}>{signOff || '—'}</div>
+                <div style={{ fontSize: '0.55rem', color: '#F9A8D4', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>SIGN OFF</div>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 600, color: '#FFFFFF' }}>{signOff || '—'}</div>
               </div>
               {duration && (
                 <div className="glass-card-inner" style={{ padding: '10px 12px', gridColumn: '1 / -1' }}>
-                  <div style={{ fontSize: '0.55rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>DURATION</div>
-                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.05rem', fontWeight: 600, color: 'var(--text)' }}>{formatDuration(duration)}</div>
+                  <div style={{ fontSize: '0.55rem', color: '#F9A8D4', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', marginBottom: 5 }}>DURATION</div>
+                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 600, color: '#FFFFFF' }}>{formatDuration(duration)}</div>
                 </div>
               )}
             </div>
