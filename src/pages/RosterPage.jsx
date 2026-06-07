@@ -418,7 +418,7 @@ export default function RosterPage() {
             <div style={{ fontSize: 9, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '2px', marginBottom: 6 }}>
               UPCOMING
             </div>
-            <div className="hide-scrollbar upcoming-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, paddingLeft: 16, paddingRight: 16, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="hide-scrollbar upcoming-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: 4, paddingLeft: 16, paddingRight: 16, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {upcomingShifts.map((item, idx) => (
                 <button key={idx}
                   onClick={() => {
@@ -426,10 +426,10 @@ export default function RosterPage() {
                     setPendingDaySelect(item.dayIndex)
                   }}
                   className="glass-card"
-                  style={{ flexShrink: 0, minWidth: 130, maxWidth: 140, borderRadius: 12, padding: '10px 14px', textAlign: 'left', cursor: 'pointer', outline: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <ShiftPill shift={item.shift} compact/>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#FFFFFF' }}>{item.code}</span>
-                  <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.dateLabel}</span>
+                  style={{ flexShrink: 0, width: 'calc(33vw - 16px)', minWidth: 'calc(33vw - 16px)', maxWidth: 'calc(33vw - 16px)', borderRadius: 12, padding: '8px 10px', textAlign: 'left', cursor: 'pointer', outline: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: '0.6rem' }}><ShiftPill shift={item.shift} compact/></span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1rem', fontWeight: 700, color: '#FFFFFF' }}>{item.code}</span>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.dateLabel}</span>
                 </button>
               ))}
             </div>
