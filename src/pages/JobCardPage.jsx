@@ -36,42 +36,54 @@ export default function JobCardPage() {
     <div style={{ padding:'16px 16px 0' }}>
       <div style={{ marginBottom:14 }}>
         <h2 style={{ margin:'0 0 3px', fontSize:'1rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace' }}>
-          Job <span style={{ color:'#F59E0B' }}>Cards</span>
+          <span style={{ color:'var(--text)' }}>Job</span> <span style={{ color:'var(--acc)' }}>Cards</span>
         </h2>
-        <p style={{ margin:0, fontSize:'0.73rem', color:'#64748B' }}>Search by shift code (e.g. EB076, CS1342)</p>
+        <p style={{ margin:0, fontSize:'0.73rem', color:'var(--muted)' }}>Search by shift code (e.g. EB076, CS1342)</p>
       </div>
 
       {/* Search */}
       <div style={{ position:'relative', marginBottom:14 }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)' }}>
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input type="text" placeholder="Type shift code…" value={query}
           onChange={e => { setQuery(e.target.value); setSelected(null) }}
-          style={{ paddingLeft:36 }} autoCapitalize="characters" autoCorrect="off" spellCheck={false} />
+          style={{
+            paddingLeft:36,
+            background:'var(--surface2)',
+            border:'1px solid var(--border)',
+            borderRadius:12,
+            color:'var(--text)',
+          }}
+          onFocus={e => { e.target.style.borderColor = 'var(--acc)' }}
+          onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
+          autoCapitalize="characters" autoCorrect="off" spellCheck={false} />
       </div>
 
       {/* Search results */}
       {!selected && results.map((card, i) => (
         <button key={i} onClick={() => setSelected(card)}
-          style={{ display:'block', width:'100%', textAlign:'left', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 12px', marginBottom:5, cursor:'pointer' }}>
-          <span className="shift-code" style={{ fontSize:'0.77rem', color:'var(--text)' }}>{card.header}</span>
+          className="glass-card"
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(249,168,212,0.4)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '' }}
+          style={{ display:'block', width:'100%', textAlign:'left', borderRadius:10, padding:'10px 14px', marginBottom:5, cursor:'pointer' }}>
+          <span className="shift-code" style={{ fontSize:'0.77rem', color:'var(--text)', fontFamily:'JetBrains Mono, monospace' }}>{card.header}</span>
         </button>
       ))}
 
       {/* No results */}
       {query.length >= 3 && results.length === 0 && !selected && (
-        <p style={{ color:'#64748B', fontSize:'0.85rem', textAlign:'center', padding:20 }}>No job cards found for "{query}"</p>
+        <p style={{ color:'var(--muted)', fontSize:'0.85rem', textAlign:'center', padding:20 }}>No job cards found for "{query}"</p>
       )}
 
       {/* Pre-shift not found */}
       {preShift && !selected && !query && (
-        <div style={{ background:'var(--surface2)', border:'1px solid var(--amber-dim)', borderRadius:10, padding:12, marginBottom:12 }}>
-          <p style={{ color:'#F59E0B', fontSize:'0.8rem', margin:0 }}>
-            Searching for: <span className="shift-code">{preShift}</span>
+        <div style={{ background:'rgba(249,168,212,0.06)', border:'1px solid rgba(249,168,212,0.2)', borderRadius:10, padding:12, marginBottom:12 }}>
+          <p style={{ color:'var(--acc)', fontSize:'0.8rem', margin:0 }}>
+            Searching for: <span className="shift-code" style={{ color:'var(--acc2)' }}>{preShift}</span>
           </p>
-          <p style={{ color:'#EF4444', fontSize:'0.75rem', margin:'4px 0 0' }}>No match found — try searching manually.</p>
+          <p style={{ color:'#FCA5A5', fontSize:'0.75rem', margin:'4px 0 0' }}>No match found — try searching manually.</p>
         </div>
       )}
 
@@ -79,7 +91,7 @@ export default function JobCardPage() {
       {!query && !selected && !preShift && (
         <div style={{ textAlign:'center', padding:40 }}>
           <div style={{ fontSize:40, marginBottom:12 }}>🚂</div>
-          <p style={{ color:'#64748B', fontSize:'0.85rem' }}>Tap a shift on the Roster page<br/>or search by code above</p>
+          <p style={{ color:'var(--muted)', fontSize:'0.85rem' }}>Tap a shift on the Roster page<br/>or search by code above</p>
         </div>
       )}
 
@@ -104,20 +116,25 @@ export default function JobCardPage() {
         <div className="fade-in">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div>
-              <div className="shift-code" style={{ fontSize:'0.78rem', color:'#F59E0B', marginBottom:2 }}>{selected.header}</div>
+              <div className="shift-code" style={{ fontSize:'0.78rem', color:'var(--acc)', fontFamily:'JetBrains Mono, monospace', marginBottom:2 }}>{selected.header}</div>
               <div style={{ fontSize:'0.68rem', color:'var(--muted)' }}>{selected.legs.length} legs</div>
             </div>
-            <button className="btn-ghost" onClick={() => { setSelected(null); setQuery('') }} style={{ color:'var(--muted)' }}>← Back</button>
+            <button onClick={() => { setSelected(null); setQuery('') }}
+              className="glass-card-inner"
+              style={{ color:'var(--muted)', border:'none', borderRadius:8, padding:'5px 12px', fontSize:'0.78rem', cursor:'pointer', fontFamily:'DM Sans, sans-serif' }}>
+              ← Back
+            </button>
           </div>
 
-          <div className="card" style={{ padding:'12px 14px' }}>
+          <div className="glass-card" style={{ padding:'12px 14px' }}>
             {allLegs.map((leg, i) => (
               <div key={i} style={{
                 display:'grid', gridTemplateColumns:'52px 1fr', gap:10,
                 paddingBottom: i < allLegs.length-1 ? 12 : 0,
                 marginBottom: i < allLegs.length-1 ? 12 : 0,
                 borderBottom: i < allLegs.length-1 ? '1px solid var(--border)' : 'none',
-                background: leg._signOn || leg._signOff ? 'var(--surface2)' : 'transparent',
+                background: leg._signOn || leg._signOff ? 'rgba(110,231,183,0.06)' : 'transparent',
+                border: leg._signOn || leg._signOff ? '1px solid rgba(110,231,183,0.15)' : 'none',
                 borderRadius: leg._signOn || leg._signOff ? 6 : 0,
                 padding: leg._signOn || leg._signOff ? '6px 8px' : undefined,
                 marginLeft: leg._signOn || leg._signOff ? -8 : 0,
@@ -125,12 +142,12 @@ export default function JobCardPage() {
               }}>
                 <div style={{ paddingTop:2 }}>
                   {leg.depart
-                    ? <span className="time-display" style={{ fontSize:'0.85rem', color: leg._signOn || leg._signOff ? '#34D399' : '#F59E0B', fontWeight:600 }}>{leg.depart}</span>
+                    ? <span className="time-display" style={{ fontSize:'0.85rem', color: leg._signOn || leg._signOff ? 'var(--mint)' : 'var(--gold2)', fontWeight:600 }}>{leg.depart}</span>
                     : <span style={{ fontSize:'0.75rem', color:'var(--muted)' }}>—</span>
                   }
                 </div>
                 <div>
-                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color: leg._signOn || leg._signOff ? '#34D399' : 'var(--text)', marginBottom:2 }}>{leg.trainNo}</div>}
+                  {leg.trainNo && <div className="shift-code" style={{ fontSize:'0.77rem', color: leg._signOn || leg._signOff ? 'var(--mint)' : 'var(--text)', fontFamily:'JetBrains Mono, monospace', marginBottom:2 }}>{leg.trainNo}</div>}
                   {(leg.centralArrive || leg.centralDepart) && (
                     <div className="time-display" style={{ fontSize:'0.7rem', color:'var(--muted)', marginBottom:2 }}>
                       {leg.centralArrive && `↓ Cen ${leg.centralArrive}`}
@@ -139,7 +156,7 @@ export default function JobCardPage() {
                     </div>
                   )}
                   {leg.arrive && <div className="time-display" style={{ fontSize:'0.7rem', color:'var(--muted)' }}>Arr {leg.arrive}</div>}
-                  {leg.remarks && <div style={{ fontSize:'0.7rem', color:'#60A5FA', marginTop:3, lineHeight:1.4 }}>{leg.remarks}</div>}
+                  {leg.remarks && <div style={{ fontSize:'0.7rem', color:'#93C5FD', marginTop:3, lineHeight:1.4 }}>{leg.remarks}</div>}
                 </div>
               </div>
             ))}
