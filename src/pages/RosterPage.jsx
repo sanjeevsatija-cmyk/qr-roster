@@ -211,10 +211,10 @@ export default function RosterPage() {
     [personalRoster]
   )
 
-  // ── Upcoming shifts (next 3 working shifts from today forward) ──────────────
+  // ── Upcoming shifts (next 3 non-leave shifts from today forward) ────────────
   const upcomingShifts = useMemo(() => {
     if (currentWeekIdx < 0) return []
-    const WORKING_TYPES = ['other', 'afp', 'eb', 'ef', 'tr', 'cs']
+    const EXCLUDED_TYPES = ['blp', 'slp', 'al', 'empty']
     const todayMid = new Date(); todayMid.setHours(0, 0, 0, 0)
     const results = []
     for (let wi = currentWeekIdx; wi < personalRoster.length && results.length < 3; wi++) {
@@ -225,7 +225,7 @@ export default function RosterPage() {
         d.setHours(0, 0, 0, 0)
         if (d < todayMid) continue
         const shift = wEntry.days[DAYS[di]] || ''
-        if (!shift || !WORKING_TYPES.includes(classifyShift(shift))) continue
+        if (!shift || EXCLUDED_TYPES.includes(classifyShift(shift))) continue
         results.push({
           shift,
           code: parseShift(shift).code,
@@ -237,6 +237,7 @@ export default function RosterPage() {
         if (results.length >= 3) break
       }
     }
+    console.log('[RosterPage] upcomingShifts:', results)
     return results
   }, [personalRoster, currentWeekIdx])
 
@@ -349,30 +350,6 @@ export default function RosterPage() {
       {/* ── Sticky header + week nav ─────────────────────────────────────────── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'var(--bg)', padding: '10px 12px 0' }}>
 
-        {/* Upcoming shifts widget */}
-        {upcomingShifts.length > 0 && (
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 9, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '2px', marginBottom: 6 }}>
-              UPCOMING
-            </div>
-            <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-              {upcomingShifts.map((item, idx) => (
-                <button key={idx}
-                  onClick={() => {
-                    setWeekOffset(item.weekIdx - currentWeekIdx)
-                    setPendingDaySelect(item.dayIndex)
-                  }}
-                  className="glass-card"
-                  style={{ flexShrink: 0, minWidth: 110, maxWidth: 130, borderRadius: 12, padding: '10px 14px', textAlign: 'left', cursor: 'pointer', outline: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <ShiftPill shift={item.shift} compact/>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#FFFFFF' }}>{item.code}</span>
-                  <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.dateLabel}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* HUD header glass card */}
         <div className="glass-card" style={{ padding: '14px 16px 12px', position: 'relative', marginBottom: 8 }}>
           <div className="hud-corner-tl"/>
@@ -434,6 +411,30 @@ export default function RosterPage() {
             </div>
           </div>
         </div>
+
+        {/* Upcoming shifts widget */}
+        {upcomingShifts.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 9, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '2px', marginBottom: 6 }}>
+              UPCOMING
+            </div>
+            <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+              {upcomingShifts.map((item, idx) => (
+                <button key={idx}
+                  onClick={() => {
+                    setWeekOffset(item.weekIdx - currentWeekIdx)
+                    setPendingDaySelect(item.dayIndex)
+                  }}
+                  className="glass-card"
+                  style={{ flexShrink: 0, minWidth: 110, maxWidth: 130, borderRadius: 12, padding: '10px 14px', textAlign: 'left', cursor: 'pointer', outline: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <ShiftPill shift={item.shift} compact/>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#FFFFFF' }}>{item.code}</span>
+                  <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.dateLabel}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Week nav strip */}
         <div className="glass-card" style={{ padding: '10px 14px', marginBottom: 8 }}>
