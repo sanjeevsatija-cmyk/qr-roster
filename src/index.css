@@ -60,6 +60,8 @@ html, body {
 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 
+.upcoming-scroll::-webkit-scrollbar { display: none; }
+
 /* Shift code typography */
 .shift-code {
   font-family: 'JetBrains Mono', monospace;
