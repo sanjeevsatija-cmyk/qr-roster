@@ -56,6 +56,10 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* Hide scrollbar (horizontal widget rows) */
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Shift code typography */
 .shift-code {
   font-family: 'JetBrains Mono', monospace;
@@ -187,8 +191,8 @@ input:focus, select:focus {
 
 /* Button */
 .btn-primary {
-  background: var(--acc3);
-  color: #12060E;
+  background: linear-gradient(135deg, #c2185b, #e91e8c);
+  color: #fff;
   font-weight: 700;
   font-size: 0.9rem;
   border: none;

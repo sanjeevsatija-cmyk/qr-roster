@@ -255,7 +255,7 @@ export default function SwapPage() {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <div style={{ display:'flex', gap:6, alignItems:'center' }}>
                 <span className="shift-code" style={{ fontSize:'0.77rem', color:'var(--acc)', fontFamily:'JetBrains Mono, monospace' }}>Link {entry.linkNum}</span>
-                {entry.isCurrent && <span style={{ fontSize:'0.62rem', color:'var(--mint)', background:'rgba(110,231,183,0.1)', border:'1px solid rgba(110,231,183,0.3)', borderRadius:20, padding:'1px 8px' }}>NOW</span>}
+                {entry.isCurrent && <span style={{ fontSize:'0.62rem', color:'var(--acc)', background:'rgba(249,168,212,0.12)', border:'1px solid rgba(249,168,212,0.3)', borderRadius:20, padding:'1px 8px' }}>NOW</span>}
                 {hasSwap && (
                   <span style={{ fontSize:'0.62rem', color:'var(--acc)', background:'rgba(249,168,212,0.1)', border:'1px solid rgba(249,168,212,0.3)', borderRadius:20, padding:'1px 8px' }}>
                     ↔ {entry.swapInfo.swapLink}{entry.swapInfo.driverName ? ` · ${entry.swapInfo.driverName}` : ''}
