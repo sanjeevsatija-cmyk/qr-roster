@@ -13,6 +13,41 @@ import { requestNotificationPermission, getNotificationPermission } from '../hoo
 import { isQldHoliday } from '../data/qldHolidays'
 import ShiftPill from '../components/ShiftPill'
 
+const QLD_PUBLIC_HOLIDAYS = {
+  '2026-01-01': 'New Year\'s Day',
+  '2026-01-26': 'Australia Day',
+  '2026-04-03': 'Good Friday',
+  '2026-04-04': 'Easter Saturday',
+  '2026-04-05': 'Easter Sunday',
+  '2026-04-06': 'Easter Monday',
+  '2026-04-25': 'Anzac Day',
+  '2026-05-04': 'Labour Day',
+  '2026-08-12': 'Ekka Show Day',
+  '2026-10-05': 'Queen\'s Birthday',
+  '2026-12-25': 'Christmas Day',
+  '2026-12-26': 'Boxing Day',
+  '2026-12-28': 'Boxing Day (substitute)',
+  '2027-01-01': 'New Year\'s Day',
+  '2027-01-26': 'Australia Day',
+  '2027-03-26': 'Good Friday',
+  '2027-03-27': 'Easter Saturday',
+  '2027-03-28': 'Easter Sunday',
+  '2027-03-29': 'Easter Monday',
+  '2027-04-26': 'Anzac Day (observed)',
+  '2027-05-03': 'Labour Day',
+  '2027-08-11': 'Ekka Show Day',
+  '2027-10-04': 'Queen\'s Birthday',
+  '2027-12-27': 'Christmas Day (observed)',
+  '2027-12-28': 'Boxing Day (observed)',
+}
+
+function getHolidayName(monday, dayIndex) {
+  const d = new Date(monday)
+  d.setDate(d.getDate() + dayIndex)
+  const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  return QLD_PUBLIC_HOLIDAYS[key] || null
+}
+
 const DAYS        = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 const MONTHS      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -22,6 +57,12 @@ function getMondayOf(date) {
   d.setHours(0, 0, 0, 0)
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
   return d
+}
+
+function buildDateKey(weekEntry, dayIndex) {
+  const d = new Date(weekEntry.monday)
+  d.setDate(d.getDate() + dayIndex)
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 }
 
 function parseShift(shift) {
@@ -154,6 +195,8 @@ export default function RosterPage() {
   const [tapCount, setTapCount] = useState(0)
   const [lastTap,  setLastTap]  = useState(0)
   const [selectedDayIdx, setSelectedDayIdx] = useState(() => (new Date().getDay() + 6) % 7)
+  const [noteText, setNoteText] = useState('')
+  const [noteOpen, setNoteOpen] = useState(false)
 
   const handleTitleTap = () => {
     const now = Date.now()
@@ -238,6 +281,7 @@ export default function RosterPage() {
   const hasNote     = !!(notes    && notes[noteKey])
   const hasReminder = !!(reminders && reminders[noteKey])
   const isHoliday   = isQldHoliday(selectedDayDate)
+  const holidayName = getHolidayName(entry.monday, selectedDayIdx)
   const daySwap     = entry.daySwapInfo?.[selectedDay] || null
   const [signOn, signOff] = times ? times.split('-') : ['', '']
   const isSelectedPast = isDayPast(selectedDayIdx)
@@ -379,11 +423,16 @@ export default function RosterPage() {
             const past      = isDayPast(i)
             const today     = isToday(day)
             const selected  = i === selectedDayIdx
-            const dk        = `${dayDate.getFullYear()}-${String(dayDate.getMonth()+1).padStart(2,'0')}-${String(dayDate.getDate()).padStart(2,'0')}`
+            const dk        = buildDateKey(entry, i)
             const dayHasNote = !!(notes && notes[dk])
+            const dayHoliday = getHolidayName(entry.monday, i)
 
             return (
-              <button key={day} onClick={() => setSelectedDayIdx(i)}
+              <button key={day} onClick={() => {
+                setSelectedDayIdx(i)
+                setNoteText(notes[dk] || '')
+                setNoteOpen(false)
+              }}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
                   padding: '8px 2px 6px', borderRadius: 10,
@@ -397,7 +446,10 @@ export default function RosterPage() {
                 <span style={{ fontSize: 18, fontWeight: 700, color: (today || selected) ? 'var(--acc)' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', lineHeight: 1.2 }}>
                   {dayDate.getDate()}
                 </span>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: dayHasNote ? 'var(--gold)' : 'transparent' }}/>
+                {dayHoliday && (
+                  <span style={{ fontSize: 10, color: '#FCD34D', display: 'block', textAlign: 'center', lineHeight: 1 }}>★</span>
+                )}
+                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#FCD34D', margin: '2px auto 0', opacity: dayHasNote ? 1 : 0 }}/>
               </button>
             )
           })}
@@ -433,6 +485,13 @@ export default function RosterPage() {
               )}
             </div>
           </div>
+
+          {/* Public holiday pill */}
+          {holidayName && (
+            <div style={{ display: 'inline-block', background: 'rgba(252,211,77,0.12)', border: '1px solid rgba(252,211,77,0.3)', borderRadius: 20, padding: '3px 10px', marginBottom: 12 }}>
+              <span style={{ color: '#FCD34D', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>★ {holidayName}</span>
+            </div>
+          )}
 
           {/* SIGN ON / SIGN OFF / DURATION — working shifts only */}
           {isWorkShift && (
@@ -491,11 +550,51 @@ export default function RosterPage() {
               Swap
             </button>
             <button
-              onClick={() => setNoteSheet({ dateKey: noteKey, dateLabel: `${selectedDay} · ${selectedDayDate.getDate()} ${MONTHS[selectedDayDate.getMonth()]}`, text: (notes && notes[noteKey]) || '' })}
-              style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: hasNote ? '1px solid rgba(252,211,77,0.3)' : '1px solid rgba(255,255,255,0.08)', background: hasNote ? 'rgba(252,211,77,0.06)' : 'rgba(255,255,255,0.04)', color: hasNote ? 'var(--gold2)' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.06em', cursor: 'pointer', outline: 'none', textTransform: 'uppercase' }}>
-              Note
+              onClick={() => setNoteOpen(o => !o)}
+              style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: hasNote ? '1px solid rgba(249,168,212,0.3)' : '1px solid rgba(255,255,255,0.08)', background: hasNote ? 'rgba(249,168,212,0.08)' : 'rgba(255,255,255,0.04)', color: hasNote ? 'var(--acc)' : 'var(--text)', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.06em', cursor: 'pointer', outline: 'none', textTransform: 'uppercase' }}>
+              {hasNote ? 'NOTE ●' : 'NOTE'}
             </button>
           </div>
+
+          {/* Inline note editor */}
+          {noteOpen && (
+            <div className="fade-in" style={{ marginTop: 8 }}>
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Add a note for this day…"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(249,168,212,0.25)',
+                  borderRadius: 10,
+                  color: 'var(--text)',
+                  fontFamily: 'DM Sans, sans-serif',
+                  fontSize: '0.85rem',
+                  padding: '10px 12px',
+                  width: '100%',
+                  minHeight: 80,
+                  resize: 'none',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={e => { e.target.style.borderColor = 'rgba(249,168,212,0.6)' }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(249,168,212,0.25)' }}
+              />
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button
+                  onClick={() => { setNote(noteKey, noteText); setNoteOpen(false) }}
+                  style={{ background: 'var(--acc3)', color: '#12060E', border: 'none', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace' }}>
+                  Save Note
+                </button>
+                <button
+                  onClick={() => { setNote(noteKey, ''); setNoteText(''); setNoteOpen(false) }}
+                  className="glass-card-inner"
+                  style={{ color: 'var(--muted)', border: 'none', borderRadius: 8, fontSize: '0.8rem', padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace' }}>
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
