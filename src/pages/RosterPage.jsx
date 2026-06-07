@@ -775,20 +775,20 @@ export default function RosterPage() {
       {/* ── Settings modal ───────────────────────────────────────────────────── */}
       {showSettings && (
         <div onClick={() => setShowSettings(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
           <div className="slide-up" onClick={e => e.stopPropagation()}
-            style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
-            <div style={{ width: 36, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }}/>
-            <h3 style={{ margin: '0 0 16px', fontSize: '0.95rem', fontWeight: 600 }}>Settings</h3>
-            <div style={{ marginBottom: 16 }}>
+            style={{ background: 'var(--surface)', borderTop: '1px solid rgba(249,168,212,0.25)', borderRadius: '20px 20px 0 0', boxShadow: '0 -4px 30px rgba(249,168,212,0.08)', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
+            <div style={{ width: 40, height: 4, background: 'rgba(249,168,212,0.25)', borderRadius: 2, margin: '0 auto 16px' }}/>
+            <h3 style={{ margin: '0 0 16px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>Settings</h3>
+            <div className="glass-card-inner" style={{ padding: '10px 14px', borderRadius: 10, marginBottom: 16 }}>
               <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0 0 4px' }}>Starting Link</p>
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--acc)', margin: 0 }}>Link {startingLink}</p>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--acc)', fontSize: '1.1rem', margin: 0 }}>Link {startingLink}</p>
             </div>
-            <button className="btn-secondary" style={{ borderColor: '#7F1D1D', color: '#EF4444', marginBottom: 8 }}
+            <button style={{ background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.3)', color: '#FCA5A5', borderRadius: 10, padding: 11, width: '100%', fontWeight: 600, marginBottom: 8, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem' }}
               onClick={() => { if (confirm('Reset all data? Cannot be undone.')) { resetAll(); setShowSettings(false) } }}>
               Reset All Data
             </button>
-            <button className="btn-ghost" onClick={() => setShowSettings(false)} style={{ width: '100%', textAlign: 'center' }}>Cancel</button>
+            <button className="btn-ghost" onClick={() => setShowSettings(false)} style={{ width: '100%', textAlign: 'center', color: 'var(--muted)' }}>Cancel</button>
           </div>
         </div>
       )}
@@ -796,21 +796,21 @@ export default function RosterPage() {
       {/* ── Reminder bottom sheet ────────────────────────────────────────────── */}
       {reminderSheet && (
         <div onClick={() => setReminderSheet(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
           <div className="slide-up" onClick={e => e.stopPropagation()}
-            style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
-            <div style={{ width: 36, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }}/>
-            <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 600 }}>Shift Reminder</h3>
+            style={{ background: 'var(--surface)', borderTop: '1px solid rgba(249,168,212,0.25)', borderRadius: '20px 20px 0 0', boxShadow: '0 -4px 30px rgba(249,168,212,0.08)', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
+            <div style={{ width: 40, height: 4, background: 'rgba(249,168,212,0.25)', borderRadius: 2, margin: '0 auto 16px' }}/>
+            <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>Shift Reminder</h3>
             <p style={{ margin: '0 0 14px', fontSize: '0.75rem', color: 'var(--muted)' }}>
               {reminderSheet.dateLabel} · Sign-on {reminderSheet.signOnTime}
             </p>
             {notifPerm === 'denied' && (
-              <p style={{ fontSize: '0.78rem', color: '#EF4444', marginBottom: 12, background: 'rgba(239,68,68,0.1)', padding: '8px 10px', borderRadius: 8 }}>
+              <p style={{ fontSize: '0.78rem', color: '#FCA5A5', marginBottom: 12, background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.25)', padding: '8px 10px', borderRadius: 10 }}>
                 Notifications are blocked. Enable them in your browser settings.
               </p>
             )}
             {notifPerm === 'default' && (
-              <button className="btn-secondary" style={{ marginBottom: 14, width: '100%' }}
+              <button className="glass-card-inner" style={{ marginBottom: 14, width: '100%', color: 'var(--text)', borderRadius: 10, padding: '11px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem' }}
                 onClick={() => requestNotificationPermission().then(p => setNotifPerm(p))}>
                 Enable notifications first →
               </button>
@@ -837,12 +837,12 @@ export default function RosterPage() {
                 </button>
               )}
               {reminders && reminders[reminderSheet.dateKey] && (
-                <button className="btn-secondary" style={{ color: '#EF4444', borderColor: '#7F1D1D' }}
+                <button style={{ background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.3)', color: '#FCA5A5', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
                   onClick={() => { clearReminder(reminderSheet.dateKey); setReminderSheet(null) }}>
                   Clear
                 </button>
               )}
-              <button className="btn-ghost" onClick={() => setReminderSheet(null)}>Cancel</button>
+              <button className="btn-ghost" style={{ color: 'var(--muted)' }} onClick={() => setReminderSheet(null)}>Cancel</button>
             </div>
           </div>
         </div>
@@ -851,16 +851,18 @@ export default function RosterPage() {
       {/* ── Note bottom sheet ────────────────────────────────────────────────── */}
       {noteSheet && (
         <div onClick={() => { setNote(noteSheet.dateKey, noteSheet.text); setNoteSheet(null) }}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }}>
           <div className="slide-up" onClick={e => e.stopPropagation()}
-            style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', borderRadius: '16px 16px 0 0', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
-            <div style={{ width: 36, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }}/>
-            <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 600 }}>Note</h3>
+            style={{ background: 'var(--surface)', borderTop: '1px solid rgba(249,168,212,0.25)', borderRadius: '20px 20px 0 0', boxShadow: '0 -4px 30px rgba(249,168,212,0.08)', padding: '20px', width: '100%', paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}>
+            <div style={{ width: 40, height: 4, background: 'rgba(249,168,212,0.25)', borderRadius: 2, margin: '0 auto 16px' }}/>
+            <h3 style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>Note</h3>
             <p style={{ margin: '0 0 12px', fontSize: '0.75rem', color: 'var(--muted)' }}>{noteSheet.dateLabel}</p>
             <textarea autoFocus value={noteSheet.text}
               onChange={e => setNoteSheet(s => ({ ...s, text: e.target.value }))}
               placeholder="Add a private note for this day…" rows={4}
-              style={{ width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: '0.88rem', color: 'var(--text)', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', outline: 'none' }}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(249,168,212,0.2)', borderRadius: 12, padding: '12px 14px', fontSize: '0.88rem', color: 'var(--text)', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', outline: 'none' }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(249,168,212,0.5)' }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(249,168,212,0.2)' }}
             />
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button className="btn-primary" style={{ flex: 1 }}
@@ -868,12 +870,12 @@ export default function RosterPage() {
                 Save
               </button>
               {notes && notes[noteSheet.dateKey] && (
-                <button className="btn-secondary" style={{ color: '#EF4444', borderColor: '#7F1D1D' }}
+                <button style={{ background: 'rgba(252,165,165,0.08)', border: '1px solid rgba(252,165,165,0.3)', color: '#FCA5A5', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
                   onClick={() => { setNote(noteSheet.dateKey, ''); setNoteSheet(null) }}>
                   Clear
                 </button>
               )}
-              <button className="btn-ghost" onClick={() => setNoteSheet(null)}>Cancel</button>
+              <button className="btn-ghost" style={{ color: 'var(--muted)' }} onClick={() => setNoteSheet(null)}>Cancel</button>
             </div>
           </div>
         </div>
