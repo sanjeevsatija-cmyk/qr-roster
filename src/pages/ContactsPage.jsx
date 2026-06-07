@@ -62,7 +62,7 @@ export default function ContactsPage() {
         }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:10 }}>
             <h1 style={{ margin:0, fontSize:'1.1rem', fontWeight:700, fontFamily:'JetBrains Mono,monospace' }}>
-              <span style={{ color:'var(--amber)' }}>QR</span> Contacts
+              <span style={{ color:'var(--acc)' }}>QR</span> <span style={{ color:'var(--text)' }}>Contacts</span>
             </h1>
             <span style={{ fontSize:'0.7rem', color:'var(--muted)' }}>
               {filtered.length !== TOTAL
@@ -78,6 +78,8 @@ export default function ContactsPage() {
             value={search}
             onChange={e => handleSearch(e.target.value)}
             style={{ marginBottom: 10 }}
+            onFocus={e => { e.target.style.borderColor = 'var(--acc)' }}
+            onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -85,25 +87,21 @@ export default function ContactsPage() {
 
           {/* Role filter pills */}
           <div style={{ display:'flex', gap:6 }}>
-            {TABS.map(({ val, label }) => (
-              <button
-                key={val}
-                onClick={() => handleRole(val)}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: 20,
-                  border: `1px solid ${roleFilter === val ? 'var(--amber)' : 'var(--border)'}`,
-                  background: roleFilter === val ? 'rgba(245,158,11,0.15)' : 'var(--surface2)',
-                  color: roleFilter === val ? 'var(--amber)' : 'var(--muted)',
-                  fontWeight: roleFilter === val ? 600 : 400,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  fontFamily: 'DM Sans, sans-serif',
-                  transition: 'border-color 0.15s',
-                }}>
-                {label}
-              </button>
-            ))}
+            {TABS.map(({ val, label }) => {
+              const active = roleFilter === val
+              return (
+                <button
+                  key={val}
+                  onClick={() => handleRole(val)}
+                  className={active ? '' : 'glass-card-inner'}
+                  style={active
+                    ? { padding:'5px 14px', borderRadius:20, border:'1px solid var(--acc)', background:'rgba(249,168,212,0.12)', color:'var(--acc)', fontWeight:600, fontSize:'0.8rem', cursor:'pointer', fontFamily:'DM Sans, sans-serif', transition:'border-color 0.15s' }
+                    : { padding:'5px 14px', borderRadius:20, color:'var(--muted)', fontWeight:400, fontSize:'0.8rem', cursor:'pointer', fontFamily:'DM Sans, sans-serif', transition:'border-color 0.15s' }
+                  }>
+                  {label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -120,9 +118,9 @@ export default function ContactsPage() {
             return (
               <div
                 key={i}
-                className="card"
+                className="glass-card"
                 style={{
-                  marginBottom: 8,
+                  marginBottom: 7,
                   padding: '10px 14px',
                   display: 'flex',
                   alignItems: 'center',
@@ -142,13 +140,10 @@ export default function ContactsPage() {
                   }}>
                     {contact.name}
                   </div>
-                  <span style={{
-                    fontSize: '0.65rem',
-                    padding: '1px 7px',
-                    borderRadius: 8,
-                    border: `0.5px solid ${isDriver ? 'var(--amber)' : '#60A5FA'}`,
-                    color: isDriver ? 'var(--amber)' : '#60A5FA',
-                  }}>
+                  <span style={isDriver
+                    ? { fontSize:'0.65rem', padding:'1px 8px', borderRadius:20, background:'rgba(249,168,212,0.1)', color:'var(--acc)', border:'1px solid rgba(249,168,212,0.3)' }
+                    : { fontSize:'0.65rem', padding:'1px 8px', borderRadius:20, background:'rgba(147,197,253,0.1)', color:'#93C5FD', border:'1px solid rgba(147,197,253,0.3)' }
+                  }>
                     {isDriver ? 'Driver' : 'Guard'}
                   </span>
                 </div>
@@ -163,9 +158,9 @@ export default function ContactsPage() {
                       gap: 4,
                       padding: '7px 12px',
                       borderRadius: 8,
-                      background: 'rgba(16,185,129,0.12)',
-                      border: '1px solid rgba(16,185,129,0.3)',
-                      color: 'var(--green)',
+                      background: 'rgba(110,231,183,0.1)',
+                      border: '1px solid rgba(110,231,183,0.3)',
+                      color: 'var(--mint)',
                       fontSize: '0.78rem',
                       fontWeight: 600,
                       textDecoration: 'none',
@@ -176,14 +171,13 @@ export default function ContactsPage() {
                   </a>
                   <a
                     href={`sms:${contact.phone}`}
+                    className="glass-card-inner"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 4,
                       padding: '7px 12px',
                       borderRadius: 8,
-                      background: 'var(--surface2)',
-                      border: '1px solid var(--border)',
                       color: 'var(--muted)',
                       fontSize: '0.78rem',
                       fontWeight: 600,
