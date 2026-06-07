@@ -197,6 +197,7 @@ export default function RosterPage() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(() => (new Date().getDay() + 6) % 7)
   const [noteText, setNoteText] = useState('')
   const [noteOpen, setNoteOpen] = useState(false)
+  const [pendingDaySelect, setPendingDaySelect] = useState(null)
 
   const handleTitleTap = () => {
     const now = Date.now()
@@ -210,6 +211,35 @@ export default function RosterPage() {
     [personalRoster]
   )
 
+  // ── Upcoming shifts (next 3 working shifts from today forward) ──────────────
+  const upcomingShifts = useMemo(() => {
+    if (currentWeekIdx < 0) return []
+    const WORKING_TYPES = ['other', 'afp', 'eb', 'ef', 'tr', 'cs']
+    const todayMid = new Date(); todayMid.setHours(0, 0, 0, 0)
+    const results = []
+    for (let wi = currentWeekIdx; wi < personalRoster.length && results.length < 3; wi++) {
+      const wEntry = personalRoster[wi]
+      for (let di = 0; di < DAYS.length; di++) {
+        const d = new Date(wEntry.monday)
+        d.setDate(d.getDate() + di)
+        d.setHours(0, 0, 0, 0)
+        if (d < todayMid) continue
+        const shift = wEntry.days[DAYS[di]] || ''
+        if (!shift || !WORKING_TYPES.includes(classifyShift(shift))) continue
+        results.push({
+          shift,
+          code: parseShift(shift).code,
+          dayName: DAYS[di],
+          dateLabel: `${DAYS[di]} ${d.getDate()} ${MONTHS[d.getMonth()]}`,
+          weekIdx: wi,
+          dayIndex: di,
+        })
+        if (results.length >= 3) break
+      }
+    }
+    return results
+  }, [personalRoster, currentWeekIdx])
+
   const displayIdx = Math.max(0, Math.min(personalRoster.length - 1, currentWeekIdx + weekOffset))
   const entry = personalRoster[displayIdx]
 
@@ -220,6 +250,15 @@ export default function RosterPage() {
       setSelectedDayIdx(0)
     }
   }, [displayIdx])
+
+  // Apply a pending day selection (from the Upcoming Shifts widget) once the
+  // target week has finished loading — runs after the effect above so it wins.
+  useEffect(() => {
+    if (pendingDaySelect !== null) {
+      setSelectedDayIdx(pendingDaySelect)
+      setPendingDaySelect(null)
+    }
+  }, [displayIdx, pendingDaySelect])
 
   if (!startingLink || !entry) return null
 
@@ -309,6 +348,30 @@ export default function RosterPage() {
 
       {/* ── Sticky header + week nav ─────────────────────────────────────────── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'var(--bg)', padding: '10px 12px 0' }}>
+
+        {/* Upcoming shifts widget */}
+        {upcomingShifts.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 9, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '2px', marginBottom: 6 }}>
+              UPCOMING
+            </div>
+            <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+              {upcomingShifts.map((item, idx) => (
+                <button key={idx}
+                  onClick={() => {
+                    setWeekOffset(item.weekIdx - currentWeekIdx)
+                    setPendingDaySelect(item.dayIndex)
+                  }}
+                  className="glass-card"
+                  style={{ flexShrink: 0, minWidth: 110, maxWidth: 130, borderRadius: 12, padding: '10px 14px', textAlign: 'left', cursor: 'pointer', outline: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <ShiftPill shift={item.shift} compact/>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#FFFFFF' }}>{item.code}</span>
+                  <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.dateLabel}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* HUD header glass card */}
         <div className="glass-card" style={{ padding: '14px 16px 12px', position: 'relative', marginBottom: 8 }}>
